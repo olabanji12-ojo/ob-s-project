@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import { getAdmin } from './_firebaseAdmin.js';
 
 export const config = {
-  runtime: 'nodejs18.x',
+  runtime: 'nodejs',
 };
 
 function text(res, status, body) {
