@@ -28,9 +28,9 @@ const Featured_collection = () => {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
         {[
-          { src: '/totebag1.jpg', alt: 'Sunset Paths Tote', name: 'Sunset Paths Tote', price: 15000, delay: 300 },
-          { src: '/totebag2.jpg', alt: 'Ocean Whispers Tote', name: 'Ocean Whispers Tote', price: 16500, delay: 400 },
-          { src: '/totebag3.jpg', alt: 'Forest Tales Tote', name: 'Forest Tales Tote', price: 15000, delay: 500 },
+          { id: 't1', src: '/totebag1.jpg', alt: 'Sunset Paths Tote', name: 'Sunset Paths Tote', price: 15000, delay: 300 },
+          { id: 't2', src: '/totebag2.jpg', alt: 'Ocean Whispers Tote', name: 'Ocean Whispers Tote', price: 16500, delay: 400 },
+          { id: 't3', src: '/totebag3.jpg', alt: 'Forest Tales Tote', name: 'Forest Tales Tote', price: 15000, delay: 500 },
         ].map((item, index) => (
           <div 
             key={index}
@@ -47,7 +47,7 @@ const Featured_collection = () => {
             <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
             <p className="text-yellow-600 font-bold mt-2">₦{item.price.toLocaleString()}</p>
             <Link
-              to="/productId"
+              to={`/product/${item.id}`}
               className="mt-4 inline-block bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold py-2 px-6 rounded-lg transition-colors duration-300"
             >
               View Details
@@ -73,5 +73,3 @@ const Featured_collection = () => {
 };
 
 export default Featured_collection;
-
-
