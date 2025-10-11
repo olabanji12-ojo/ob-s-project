@@ -21,7 +21,7 @@ const Payment_failed = () => {
 
         <div className="flex justify-center space-x-4">
           <button
-            onClick={() => navigate(-1)} // Go back to checkout
+            onClick={() => navigate()} // Go back to checkout
             className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-6 rounded-md transition duration-300"
           >
             Try Again
