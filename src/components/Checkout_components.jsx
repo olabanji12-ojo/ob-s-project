@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext'; // Added import
 import { db } from '../firebase/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import Paystack from '@paystack/inline-js';
 
 const Checkout_components = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const { items, totalPrice } = useCart(); // Use dynamic cart data
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -18,23 +21,7 @@ const Checkout_components = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const cartItems = [
-    {
-      id: 1,
-      name: 'Forest Tales Tote',
-      image: '/totebag1.jpg',
-      quantity: 1,
-      total: 15500,
-    },
-    {
-      id: 2,
-      name: 'Ocean Whispers Tote',
-      image: '/totebag2.jpg',
-      quantity: 2,
-      total: 33000,
-    },
-  ];
-  const cartTotal = 48500;
+  const popup = new Paystack()
 
   // Fetch user data from Firestore on mount
   useEffect(() => {
@@ -86,20 +73,18 @@ const Checkout_components = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted. Current user:', currentUser);
     setError('');
     setLoading(true);
-
+  
     if (!currentUser) {
-      console.log('No authenticated user. Redirecting to /signup.');
-      setError('You must be logged in to proceed with checkout.');
+      alert('You must be logged in to proceed with checkout.');
       navigate('/signup_page');
       setLoading(false);
       return;
     }
-
+  
     try {
-      console.log('Saving data to Firestore for UID:', currentUser.uid);
+      // Step 1: Save user info to Firestore
       await setDoc(
         doc(db, 'users', currentUser.uid),
         {
@@ -113,24 +98,56 @@ const Checkout_components = () => {
         },
         { merge: true }
       );
-      console.log('Firestore data saved successfully.');
-
-      // Placeholder for payment integration
-      console.log('Checkout submitted:', { formData, cartItems, cartTotal });
-      alert('Form submitted! (Payment integration placeholder)');
-      // TODO: Integrate payment gateway (e.g., Paystack, Stripe)
-      // navigate('/payment-success'); // Example redirect after payment
+  
+      // Step 2: Start Paystack One-time payment
+      const paystack = new Paystack();
+      paystack.checkout({
+        key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY, // your public key
+        email: formData.email,
+        amount: totalPrice * 100, // Paystack works in kobo (NGN * 100)
+        currency: 'NGN',
+        onSuccess: async (transaction) => {
+          console.log("Transaction success:", transaction);
+        
+          try {
+            const res = await fetch(`/api/verifyPaystack?reference=${transaction.reference}`);
+            const data = await res.json();
+        
+            if (data.verified) {
+              console.log("Payment verified:", data.data);
+              navigate("/payment-success", { state: { reference: transaction.reference } });
+            } else {
+              navigate("/payment-failed");
+            }
+          } catch (error) {
+            console.error("Verification error:", error);
+            navigate("/payment-failed");
+          }
+        },
+        
+        onCancel: () => {
+          navigate('/payment-failed', {
+            state: { reason: 'User canceled payment' },
+          });
+        },
+        
+        onError: (error) => {
+          console.error('Payment error:', error);
+          navigate('/payment-failed', {
+            state: { reason: 'Payment error', details: error.message },
+          });
+        },
+        
+      });
+  
     } catch (err) {
       console.error('Error saving data:', err.message, err.code);
-      setError(
-        err.code === 'permission-denied'
-          ? 'Permission denied. Please check Firestore rules.'
-          : 'Failed to process checkout. Please try again.'
-      );
+      setError('Failed to process checkout. Please try again.');
     }
-
+  
     setLoading(false);
   };
+  
 
   return (
     <div
@@ -228,7 +245,7 @@ const Checkout_components = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 focus:outline-none focus:border-[#F4C430] transition-colors"
+                className="mt-1 block w-full borde r-gray-300 rounded-md shadow-sm p-3 focus:outline-none focus:border-[#F4C430] transition-colors"
                 placeholder="Enter your phone number"
               />
             </div>
@@ -316,7 +333,7 @@ const Checkout_components = () => {
               data-aos-duration="800"
             >
               <p className="text-lg font-semibold">
-                Total: <span className="text-[#8B5E3C]">₦{cartTotal.toLocaleString()}</span>
+                Total: <span className="text-[#8B5E3C]">₦{totalPrice.toLocaleString()}</span>
               </p>
               <button
                 type="submit"
@@ -346,10 +363,10 @@ const Checkout_components = () => {
             Order Items
           </h3>
           <div className="space-y-4">
-            {cartItems.length > 0 ? (
-              cartItems.map((item, index) => (
+            {items.length > 0 ? (
+              items.map((item, index) => (
                 <div
-                  key={item.id}
+                  key={item.productId || item.id}
                   className="flex items-center"
                   data-aos="fade-left"
                   data-aos-delay={400 + index * 100}
@@ -363,7 +380,7 @@ const Checkout_components = () => {
                   <div>
                     <p className="font-medium">{item.name}</p>
                     <p className="text-gray-600">Quantity: {item.quantity}</p>
-                    <p className="text-[#8B5E3C] font-semibold">₦{item.total.toLocaleString()}</p>
+                    <p className="text-[#8B5E3C] font-semibold">₦{(item.price * item.quantity).toLocaleString()}</p>
                   </div>
                 </div>
               ))
@@ -385,7 +402,7 @@ const Checkout_components = () => {
             data-aos-duration="800"
           >
             <p className="text-lg font-semibold">
-              Total: <span className="text-[#8B5E3C]">₦{cartTotal.toLocaleString()}</span>
+              Total: <span className="text-[#8B5E3C]">₦{totalPrice.toLocaleString()}</span>
             </p>
           </div>
         </div>

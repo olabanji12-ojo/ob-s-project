@@ -205,20 +205,7 @@ const Cart_components = () => {
               {/* Proceed to Checkout */}
               <button
                 onClick={async () => {
-                  if (!currentUser) return navigate('/signup_page');
-                  try {
-                    const resp = await fetch('/api/checkout', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ uid: currentUser.uid, email: currentUser.email })
-                    });
-                    const json = await resp.json();
-                    if (!resp.ok) throw new Error(json.error || 'Checkout failed');
-                    window.location.href = json.authorization_url;
-                  } catch (e) {
-                    console.error('Checkout error:', e);
-                    alert('Unable to start checkout. Please try again.');
-                  }
+                  navigate('/checkout_page')
                 }}
                 className="w-full text-center bg-[#F4C430] hover:bg-[#E5B520] text-[#3E3E3E] font-semibold py-3 sm:py-3.5 rounded-lg mb-3 transition duration-300 shadow-sm hover:shadow-md"
                 data-aos="zoom-in"

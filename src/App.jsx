@@ -11,6 +11,7 @@ import Login_page from './pages/Login_page'
 import Signup_page from './pages/Signup_page'
 import OrderComplete_page from './pages/OrderComplete_page'
 import { Routes, Route, Outlet } from "react-router-dom";
+import Payment_success from './components/Payment_success'
 
 
 import AOS from 'aos';
@@ -52,7 +53,9 @@ const App = () => {
           <Route path='/login_page' element={<Login_page />} />
           <Route path='/signup_page' element={<Signup_page />} />
           <Route path='/order/complete' element={<OrderComplete_page />} />
-
+          <Route path='payment-success' element={<Payment_success />} ></Route>
+          <Route path='payment-failed' element={<Payment_failed />} ></Route>
+          
 
           {/* Add more pages like below */}
           {/* <Route path="about" element={<About />} /> */}
