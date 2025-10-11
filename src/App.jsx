@@ -12,7 +12,7 @@ import Signup_page from './pages/Signup_page'
 import OrderComplete_page from './pages/OrderComplete_page'
 import { Routes, Route, Outlet } from "react-router-dom";
 import Payment_success from './components/Payment_success'
-
+import Payment_failed from './components/Payment_failed'
 
 import AOS from 'aos';
 import 'aos/dist/aos.css';
