@@ -7,7 +7,7 @@ const Login_component = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, googleSignIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -77,8 +77,34 @@ const Login_component = () => {
             data-aos-delay="600"
           >
             {loading ? 'Logging In...' : 'Log In'}
-          </button>
+          </button>    
         </form>
+        <div className="mt-6 flex flex-col items-center" data-aos="fade-up" data-aos-delay="750">
+          <p className="text-sm text-gray-600 mb-2">or continue with</p>
+          <button
+            onClick={async () => {
+              try {
+                setLoading(true);
+                await googleSignIn();
+                navigate("/");
+              } catch (error) {
+                console.error("Google Sign-In failed", error);
+                setError("Google Sign-In failed. Try again.");
+              } finally {
+                setLoading(false);
+              }
+            }}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-3 hover:bg-gray-50 transition-all duration-300"
+          >
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google logo"
+              className="w-5 h-5"
+            />
+            <span className="text-[#3E3E3E] font-medium">Sign in with Google</span>
+          </button>
+        </div>
         <p className="text-center text-sm text-[#3E3E3E] mt-6" data-aos="fade-up" data-aos-delay="700">
           Don't have an account?{' '}
           <Link to="/signup_page" className="text-[#F4C430] hover:underline font-medium">

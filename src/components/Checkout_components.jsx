@@ -22,6 +22,7 @@ const Checkout_components = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const popup = new Paystack()
+  const {clearCart} = useCart()
 
   // Fetch user data from Firestore on mount
   useEffect(() => {
@@ -112,9 +113,32 @@ const Checkout_components = () => {
           try {
             const res = await fetch(`/api/verifyPaystack?reference=${transaction.reference}`);
             const data = await res.json();
-        
             if (data.verified) {
-              console.log("Payment verified:", data.data);
+              const transactionData = data.data;
+            
+              // Save to Firestore
+              await setDoc(doc(db, "transactions", transactionData.reference), {
+                userId: currentUser?.uid,
+                email: transactionData.customer.email,
+                amount: transactionData.amount / 100,
+                status: transactionData.status,
+                reference: transactionData.reference,
+                gateway_response: transactionData.gateway_response,
+                paid_at: transactionData.paid_at,
+                created_at: new Date(),
+                items: items.map(i => ({
+                  name: i.name,
+                  price: i.price,
+                  quantity: i.quantity,
+                })),
+              });
+            
+              console.log("Transaction saved to Firestore ✅");
+            
+              // Clear cart here
+              clearCart();
+            
+              // Redirect to success page
               navigate("/payment-success", { state: { reference: transaction.reference } });
             } else {
               navigate("/payment-failed");
