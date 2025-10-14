@@ -45,9 +45,10 @@ const Cart_components = () => {
                   <div className="flex gap-4">
                     {/* Product Image */}
                     <img
-                      src={item.image}
+                      src={item.image && item.image.length > 0 ? item.image[0] : "/placeholder.png"}
                       alt={item.name}
                       className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded flex-shrink-0"
+                      onError={(e) => (e.target.src = "/placeholder.png")}
                     />
                     
                     {/* Product Info & Controls */}

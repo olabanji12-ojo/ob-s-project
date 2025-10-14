@@ -38,7 +38,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <h1 className="text-2xl font-serif text-[#3E3E3E] font-semibold">
-              Bomfa
+              Bomffa
             </h1>
           </div>
 

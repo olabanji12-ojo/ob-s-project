@@ -25,6 +25,9 @@ export function useCart() {
 
 const GUEST_CART_KEY = 'guest_cart_v1';
 
+// ---------------------------
+// Local Storage Helpers
+// ---------------------------
 function readGuestCart() {
   try {
     const raw = localStorage.getItem(GUEST_CART_KEY);
@@ -69,36 +72,61 @@ function upsertGuestItem(items, product, quantity) {
   return items;
 }
 
+// ---------------------------
+// Cart Provider
+// ---------------------------
 export function CartProvider({ children }) {
   const { currentUser } = useAuth();
-  const [items, setItems] = useState([]); // unified items for UI
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const mergeRef = useRef(false);
 
-  // Build a deterministic cart item document ID so we can upsert without extra queries
-  const itemDocId = (uid, productId) => `${uid}_${String(productId)}`;
-
-  // Mode: guest (localStorage) or authed (Firestore)
   const isGuest = !currentUser;
 
-  // Initialize and subscribe depending on auth state
+  const itemDocId = (uid, productId) => `${uid}_${String(productId)}`;
+
+  // ---------------------------
+  // Stock Checker Helper
+  // ---------------------------
+  async function checkStock(productId, desiredQuantity = 1) {
+    const ref = doc(db, 'products', productId);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+      throw new Error('Product not found');
+    }
+
+    const data = snap.data();
+    const stock = data.stock ?? 0;
+
+    if (stock <= 0) {
+      throw new Error('This product is out of stock.');
+    }
+
+    if (desiredQuantity > stock) {
+      throw new Error(`Only ${stock} left in stock.`);
+    }
+
+    return stock;
+  }
+
+  // ---------------------------
+  // Firestore Sync
+  // ---------------------------
   useEffect(() => {
     if (isGuest) {
-      // Guest mode: read from localStorage
       const local = readGuestCart();
       setItems(local);
       setLoading(false);
       return;
     }
 
-    // Authenticated: subscribe to Firestore cart
     setLoading(true);
     const q = query(collection(db, 'cart'), where('userId', '==', currentUser.uid));
     const unsub = onSnapshot(
       q,
       (snapshot) => {
         const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-        // Normalize for UI: ensure productId present
         const normalized = list.map((it) => ({
           ...it,
           productId: it.productId ?? it.id?.split('_')?.slice(1).join('_'),
@@ -115,14 +143,17 @@ export function CartProvider({ children }) {
     return () => unsub();
   }, [isGuest, currentUser]);
 
-  // Merge guest cart into Firestore on login
+  // ---------------------------
+  // Merge Guest Cart after Login
+  // ---------------------------
   useEffect(() => {
     async function mergeGuestIntoFirestore() {
       if (!currentUser) return;
-      if (mergeRef.current) return; // prevent duplicate merges
+      if (mergeRef.current) return;
       const guestItems = readGuestCart();
       if (!guestItems.length) return;
       mergeRef.current = true;
+
       try {
         for (const gi of guestItems) {
           const product = {
@@ -133,7 +164,7 @@ export function CartProvider({ children }) {
           };
           await addToCartFirestore(product, gi.quantity || 1);
         }
-        writeGuestCart([]); // clear guest cart after successful merge
+        writeGuestCart([]);
       } catch (e) {
         console.error('Failed to merge guest cart:', e);
       } finally {
@@ -153,15 +184,20 @@ export function CartProvider({ children }) {
     [items]
   );
 
-  // Internal Firestore upsert
+  // ---------------------------
+  // Add to Cart (Firestore)
+  // ---------------------------
   async function addToCartFirestore(product, quantity = 1) {
     const uid = currentUser?.uid;
     if (!uid) throw new Error('AUTH_REQUIRED');
     if (!product || product.id == null) throw new Error('INVALID_PRODUCT');
+
+    // 🔹 Check Stock before adding
+    await checkStock(product.id, quantity);
+
     const id = itemDocId(uid, product.id);
     const ref = doc(db, 'cart', id);
 
-    // Single write that works for both create and update without requiring a prior read
     await setDoc(
       ref,
       {
@@ -178,28 +214,48 @@ export function CartProvider({ children }) {
     );
   }
 
-  // Internal localStorage upsert
-  function addToCartLocal(product, quantity = 1) {
-    const current = readGuestCart();
-    upsertGuestItem(current, product, quantity);
-    writeGuestCart(current);
-    setItems([...current]);
+  // ---------------------------
+  // Add to Cart (Local)
+  // ---------------------------
+  async function addToCartLocal(product, quantity = 1) {
+    try {
+      await checkStock(product.id, quantity);
+      const current = readGuestCart();
+      upsertGuestItem(current, product, quantity);
+      writeGuestCart(current);
+      setItems([...current]);
+    } catch (err) {
+      alert(err.message);
+    }
   }
 
+  // ---------------------------
+  // Add To Cart (Unified)
+  // ---------------------------
   async function addToCart(product, quantity = 1) {
     if (!product || (product.id == null && product.productId == null)) {
       throw new Error('INVALID_PRODUCT');
     }
     if (quantity <= 0) return;
-    if (isGuest) {
-      addToCartLocal(product, quantity);
-    } else {
-      await addToCartFirestore(product, quantity);
+
+    try {
+      if (isGuest) {
+        await addToCartLocal(product, quantity);
+      } else {
+        await addToCartFirestore(product, quantity);
+      }
+    } catch (err) {
+      alert(err.message);
     }
   }
 
+  // ---------------------------
+  // Update, Remove, Clear
+  // ---------------------------
   async function updateQuantity(productId, newQuantity) {
     if (newQuantity <= 0) return removeFromCart(productId);
+
+    await checkStock(productId, newQuantity);
 
     if (isGuest) {
       const current = readGuestCart();
