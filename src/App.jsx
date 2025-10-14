@@ -13,6 +13,7 @@ import OrderComplete_page from './pages/OrderComplete_page'
 import { Routes, Route, Outlet } from "react-router-dom";
 import Payment_success from './components/Payment_success'
 import Payment_failed from './components/Payment_failed'
+import Art_pages from './pages/Art_pages'
 
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -47,7 +48,7 @@ const App = () => {
           <Route path='/' element={<Home_page />} />
           <Route path='/products' element={<Product_page />} />
           <Route path='/product/:id' element={<Product_id_page />} />
-          <Route path='/read_story' element={<Read_story />} />
+          <Route path="/read_story/:id" element={<Read_story />} />
           <Route path='/cart_page' element={<Cart_page />} />
           <Route path='/checkout_page' element={<Checkout_page />} />
           <Route path='/login_page' element={<Login_page />} />
@@ -55,6 +56,8 @@ const App = () => {
           <Route path='/order/complete' element={<OrderComplete_page />} />
           <Route path='payment-success' element={<Payment_success />} ></Route>
           <Route path='payment-failed' element={<Payment_failed />} ></Route>
+          <Route path='art-pages' element={<Art_pages />} ></Route>
+
           
 
           {/* Add more pages like below */}

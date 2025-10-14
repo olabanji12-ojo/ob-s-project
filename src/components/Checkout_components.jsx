@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext'; // Added import
 import { db } from '../firebase/firebase';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';  // ✅ Add updateDoc
 import { useNavigate } from 'react-router-dom';
 import Paystack from '@paystack/inline-js';
+
 
 const Checkout_components = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const { items, totalPrice } = useCart(); // Use dynamic cart data
+  const { items, totalPrice, clearCart } = useCart();
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -21,10 +23,50 @@ const Checkout_components = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const popup = new Paystack()
-  const {clearCart} = useCart()
 
-  // Fetch user data from Firestore on mount
+  // ✅ Check stock availability before checkout
+  const checkStockForCart = async (cartItems) => {
+    const outOfStockItems = [];
+  
+    for (const item of cartItems) {
+      const productRef = doc(db, "products", item.productId);  // ✅ Use productId
+      const productSnap = await getDoc(productRef);
+  
+      if (!productSnap.exists()) {
+        outOfStockItems.push(item.name + " (not found)");
+        continue;
+      }
+  
+      const productData = productSnap.data();
+      if (productData.stock < item.quantity) {
+        outOfStockItems.push(`${item.name} (only ${productData.stock} left)`);
+      }
+    }
+  
+    if (outOfStockItems.length > 0) {
+      alert("The following items are out of stock:\n\n" + outOfStockItems.join("\n"));
+      return { ok: false };
+    }
+  
+    return { ok: true };
+  };
+  
+
+  // ✅ Update product stock after successful payment
+  const updateProductStock = async (cartItems) => {
+    for (const item of cartItems) {
+      const productRef = doc(db, "products", item.productId);  // ✅ Use productId
+      const productSnap = await getDoc(productRef);
+      if (productSnap.exists()) {
+        const productData = productSnap.data();
+        const newStock = productData.stock - item.quantity;
+        await updateDoc(productRef, { stock: Math.max(newStock, 0) });
+      }
+    }
+  };
+  
+
+  // Prefill user info
   useEffect(() => {
     if (currentUser) {
       setFormData({
@@ -37,14 +79,11 @@ const Checkout_components = () => {
         zipcode: '',
       });
 
-      // Fetch additional user data from Firestore
       const fetchUserData = async () => {
         try {
-          console.log('Fetching Firestore data for UID:', currentUser.uid);
           const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            console.log('Firestore data retrieved:', userData);
             setFormData((prev) => ({
               ...prev,
               phone: userData.phone || '',
@@ -53,17 +92,12 @@ const Checkout_components = () => {
               state: userData.state || '',
               zipcode: userData.zipcode || '',
             }));
-          } else {
-            console.log('No Firestore document found for UID:', currentUser.uid);
           }
         } catch (err) {
-          console.error('Error fetching user data:', err.message, err.code);
-          setError('Failed to load user data. Please try again.');
+          setError('Failed to load user data.');
         }
       };
       fetchUserData();
-    } else {
-      console.log('No authenticated user. Should redirect to /signup via PrivateCheckoutRoute.');
     }
   }, [currentUser]);
 
@@ -72,103 +106,95 @@ const Checkout_components = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ✅ Main checkout logic
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-  
+
     if (!currentUser) {
-      alert('You must be logged in to proceed with checkout.');
+      alert('You must be logged in to proceed.');
       navigate('/signup_page');
       setLoading(false);
       return;
     }
-  
+
+    // Step 1: Check stock before payment
+    const stockCheck = await checkStockForCart(items);
+    if (!stockCheck.ok) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Step 1: Save user info to Firestore
+      // Step 2: Save user info
       await setDoc(
         doc(db, 'users', currentUser.uid),
-        {
-          fullName: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          zipcode: formData.zipcode,
-        },
+        { ...formData },
         { merge: true }
       );
-  
-      // Step 2: Start Paystack One-time payment
+
+      // Step 3: Start Paystack Payment
       const paystack = new Paystack();
       paystack.checkout({
-        key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY, // your public key
+        key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
         email: formData.email,
-        amount: totalPrice * 100, // Paystack works in kobo (NGN * 100)
+        amount: totalPrice * 100,
         currency: 'NGN',
+
         onSuccess: async (transaction) => {
-          console.log("Transaction success:", transaction);
-        
           try {
-            const res = await fetch(`/api/verifyPaystack?reference=${transaction.reference}`);
-            const data = await res.json();
-            if (data.verified) {
-              const transactionData = data.data;
-            
-              // Save to Firestore
-              await setDoc(doc(db, "transactions", transactionData.reference), {
+            const res = await fetch(`http://localhost:5000/api/verifyPaystack`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                reference: transaction.reference,
                 userId: currentUser?.uid,
-                email: transactionData.customer.email,
-                amount: transactionData.amount / 100,
-                status: transactionData.status,
-                reference: transactionData.reference,
-                gateway_response: transactionData.gateway_response,
-                paid_at: transactionData.paid_at,
-                created_at: new Date(),
-                items: items.map(i => ({
-                  name: i.name,
-                  price: i.price,
-                  quantity: i.quantity,
-                })),
-              });
-            
-              console.log("Transaction saved to Firestore ✅");
-            
-              // Clear cart here
+                items: items,
+                formData: formData,
+                totalPrice: totalPrice
+              }),
+            });
+        
+            let data;
+            try {
+              data = await res.json();
+            } catch (err) {
+              console.error('Failed to parse JSON from backend:', await res.text());
+              navigate("/payment-failed");
+              return;
+            }
+
+            console.log("Verification response:", data);
+        
+            if (data.verified) {
               clearCart();
-            
-              // Redirect to success page
               navigate("/payment-success", { state: { reference: transaction.reference } });
             } else {
               navigate("/payment-failed");
             }
-          } catch (error) {
-            console.error("Verification error:", error);
+          } catch (err) {
+            console.error("Payment verification failed:", err);
             navigate("/payment-failed");
           }
         },
         
         onCancel: () => {
-          navigate('/payment-failed', {
-            state: { reason: 'User canceled payment' },
-          });
+          navigate('/payment-failed', { state: { reason: 'User canceled payment' } });
         },
-        
+
         onError: (error) => {
           console.error('Payment error:', error);
           navigate('/payment-failed', {
             state: { reason: 'Payment error', details: error.message },
           });
         },
-        
       });
-  
     } catch (err) {
-      console.error('Error saving data:', err.message, err.code);
+      console.error('Checkout error:', err);
       setError('Failed to process checkout. Please try again.');
     }
-  
+
     setLoading(false);
   };
   
@@ -397,9 +423,10 @@ const Checkout_components = () => {
                   data-aos-duration="800"
                 >
                   <img
-                    src={item.image}
+                    src={item.image && item.image.length > 0 ? item.image[0] : "/placeholder.png"}
                     alt={item.name}
                     className="w-16 h-16 object-cover rounded-md mr-4"
+                    onError={(e) => (e.target.src = "/placeholder.png")}
                   />
                   <div>
                     <p className="font-medium">{item.name}</p>
