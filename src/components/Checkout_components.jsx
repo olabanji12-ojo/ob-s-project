@@ -114,7 +114,7 @@ const Checkout_components = () => {
 
     if (!currentUser) {
       alert('You must be logged in to proceed.');
-      navigate('/signup_page');
+      navigate('/login_page');
       setLoading(false);
       return;
     }
