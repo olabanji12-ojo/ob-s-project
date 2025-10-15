@@ -144,7 +144,7 @@ const Checkout_components = () => {
 
         onSuccess: async (transaction) => {
           try {
-            const res = await fetch(`api/verifyPaystack`, {
+            const res = await fetch(`/api/verifyPaystack`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
