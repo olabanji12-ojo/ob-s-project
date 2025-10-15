@@ -169,7 +169,13 @@ const Checkout_components = () => {
         
             if (data.verified) {
               clearCart();
-              navigate("/payment-success", { state: { reference: transaction.reference } });
+              navigate("/payment-success", { 
+                state: { 
+                  reference: transaction.reference,
+                  amount: totalPrice * 100,
+                  status: transaction.status || 'success'
+                } 
+              });
             } else {
               navigate("/payment-failed");
             }
