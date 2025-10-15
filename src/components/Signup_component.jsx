@@ -117,7 +117,7 @@ const Signup_component = () => {
         </form>
         <p className="text-center text-sm text-[#3E3E3E] mt-6" data-aos="fade-up" data-aos-delay="700">
           Already have an account?{' '}
-          <Link to="/login" className="text-[#F4C430] hover:underline font-medium">
+          <Link to="/login_page" className="text-[#F4C430] hover:underline font-medium">
             Log In
           </Link>
         </p>
