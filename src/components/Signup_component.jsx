@@ -11,6 +11,7 @@ const Signup_component = () => {
   const [loading, setLoading] = useState(false);
   const { signup } = useAuth();
   const navigate = useNavigate();
+  const { login, googleSignIn } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -142,7 +143,7 @@ const Signup_component = () => {
             <span className="text-[#3E3E3E] font-medium">Sign in with Google</span>
           </button>
         </div>
-        
+
         <p className="text-center text-sm text-[#3E3E3E] mt-6" data-aos="fade-up" data-aos-delay="700">
           Already have an account?{' '}
           <Link to="/login_page" className="text-[#F4C430] hover:underline font-medium">
