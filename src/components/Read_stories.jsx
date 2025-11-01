@@ -114,6 +114,7 @@ const Read_stories = () => {
               data-aos-delay="300"
               data-aos-duration="800"
             >
+<<<<<<< HEAD
               <Link to={`/art/${id}`}>
                 <img 
                   src={story.image} 
@@ -121,6 +122,13 @@ const Read_stories = () => {
                   className="rounded-2xl shadow-lg max-h-[500px] object-cover cursor-pointer transform transition-transform duration-300 hover:scale-105"
                 />
               </Link>
+=======
+              <img 
+                src={story.image} 
+                alt={story.title} 
+                className="rounded-2xl shadow-lg max-h-[500px] object-cover"
+              />
+>>>>>>> f4b82d8ab99a230a20e2675522c73f4657bb438c
             </div>
           )}
         </div>

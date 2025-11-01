@@ -7,7 +7,11 @@ const Hero = () => {
       {/* Background Image with Overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-[#f7ead7] bg-center bg-no-repeat"
+<<<<<<< HEAD
         style={{ backgroundImage: "url('/totebag_background.jpeg')" }}
+=======
+        // style={{ backgroundImage: "url('/tote-bag-background.png')" }}
+>>>>>>> f4b82d8ab99a230a20e2675522c73f4657bb438c
       >
         {/* Dark Overlay for better text readability */}
         <div className="absolute inset-0 bg-opacity-40"></div>
@@ -16,7 +20,11 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 sm:px-6 lg:px-8">
         <h1 
+<<<<<<< HEAD
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-gray-800 mb-4 md:mb-6 leading-tight"
+=======
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-[#8B5E3C] mb-4 md:mb-6 leading-tight"
+>>>>>>> f4b82d8ab99a230a20e2675522c73f4657bb438c
           data-aos="fade-up"
           data-aos-delay="100"
           data-aos-duration="800"
@@ -25,7 +33,11 @@ const Hero = () => {
         </h1>
         
         <p 
+<<<<<<< HEAD
           className="text-base sm:text-lg md:text-xl text-gray-800 max-w-3xl mb-8 md:mb-10 leading-relaxed px-4"
+=======
+          className="text-base sm:text-lg md:text-xl text-[#8B5E3C] max-w-3xl mb-8 md:mb-10 leading-relaxed px-4"
+>>>>>>> f4b82d8ab99a230a20e2675522c73f4657bb438c
           data-aos="fade-up"
           data-aos-delay="200"
           data-aos-duration="800"
@@ -64,9 +76,13 @@ const Hero = () => {
           <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
         </svg>
       </div>
+<<<<<<< HEAD
       <hr></hr>
     </section>
     
+=======
+    </section>
+>>>>>>> f4b82d8ab99a230a20e2675522c73f4657bb438c
   );
 };
 
