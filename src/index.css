@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 @import "tailwindcss";
 
 .navigation-wrapper {
@@ -53,6 +52,3 @@
 .arrow--disabled {
   fill: rgba(255, 255, 255, 0.5);
 }
-=======
-@import "tailwindcss";
->>>>>>> f4b82d8ab99a230a20e2675522c73f4657bb438c

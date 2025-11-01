@@ -1,0 +1,38 @@
+[33m393fdb3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m fixes
+[33me9137d1[m fixed image issues
+[33mfb0f282[m deleted unnecessary pictures
+[33m9b155f7[m added the real arts
+[33mf4b82d8[m[33m ([m[1;31morigin/master[m[33m)[m payment
+[33mf111f35[m payment
+[33m5be7eaa[m live payment
+[33m45fb9c8[m live payment
+[33m7378cd1[m payment-success fix
+[33me8a033c[m payment-success fix
+[33m744167f[m signup_fix
+[33m3da1e95[m signup_fix
+[33m152b393[m sign in with google route
+[33macc3011[m sign in with google route
+[33me9bbc3d[m vercel.json
+[33madbdbd0[m vercel.json
+[33ma617a7f[m signup_page fix
+[33mea8fdbf[m signup_page fix
+[33mb70c10a[m route fix
+[33m9b269f9[m route fix
+[33mec04292[m added serverless payment verifivcation
+[33mad3709a[m added serverless payment verifivcation
+[33m78a270c[m fix 404 issues on vercel
+[33m0af00f8[m fix 404 issues on vercel
+[33m2766efd[m google auth
+[33m13a8d75[m google auth
+[33m00f2837[m payment_failed route
+[33m28126fd[m payment_failed route
+[33m3e966c5[m verifyPayment
+[33mcbf7e59[m verifyPayment
+[33m7f5d0fb[m product id
+[33m6222124[m product id
+[33m3fa6c3c[m second commit
+[33m2d7919a[m second commit
+[33m4350f60[m runtime config
+[33mde472f2[m runtime config
+[33m089e54b[m ob project
+[33mc2e207c[m ob project

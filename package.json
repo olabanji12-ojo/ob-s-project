@@ -21,11 +21,9 @@
     "express": "^5.1.0",
     "firebase": "^12.3.0",
     "firebase-admin": "^13.5.0",
+    "framer-motion": "^12.23.24",
     "fs": "^0.0.1-security",
-<<<<<<< HEAD
     "keen-slider": "^6.8.6",
-=======
->>>>>>> f4b82d8ab99a230a20e2675522c73f4657bb438c
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
