@@ -1,49 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/firebase';
 
 const Art_components = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const { artworkId } = useParams();
+  const [artworks, setArtworks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const highlightedArtworkRef = useRef(null);
 
-  const artItems = [
-    { id: 'a1', src: '/art1.jpg', alt: 'Abstract Harmony', title: 'Abstract Harmony', artist: 'Local Artist' },
-    { id: 'a2', src: '/art2.jpg', alt: 'Sunset Dreams', title: 'Sunset Dreams', artist: 'Local Artist' },
-    { id: 'a3', src: '/art3.jpg', alt: 'Urban Tales', title: 'Urban Tales', artist: 'Local Artist' },
-    { id: 'a4', src: '/art4.jpg', alt: 'Nature\'s Echo', title: 'Nature\'s Echo', artist: 'Local Artist' },
-    { id: 'a5', src: '/art5.jpg', alt: 'Golden Hour', title: 'Golden Hour', artist: 'Local Artist' },
-  ];
-
-  // Auto-slide every 5 seconds
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    const fetchArtworks = async () => {
+      try {
+        const storiesCollection = collection(db, 'stories');
+        const storiesSnapshot = await getDocs(storiesCollection);
+        const artworksData = storiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setArtworks(artworksData);
+      } catch (error) {
+        console.error("Error fetching artworks:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => 
-        prevIndex === artItems.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 5000);
+    fetchArtworks();
+  }, []);
 
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, artItems.length]);
+  useEffect(() => {
+    if (!loading && highlightedArtworkRef.current) {
+      highlightedArtworkRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [loading, artworks]); // Also depend on artworks to ensure it runs after they are set
 
-  const goToPrevious = () => {
-    setIsAutoPlaying(false);
-    setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? artItems.length - 1 : prevIndex - 1
+  if (loading) {
+    return (
+      <section className="py-20 text-center text-gray-600 bg-[#f7ead7]">
+        <p>Loading artworks...</p>
+      </section>
     );
-  };
-
-  const goToNext = () => {
-    setIsAutoPlaying(false);
-    setCurrentIndex((prevIndex) => 
-      prevIndex === artItems.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
-  const goToSlide = (index) => {
-    setIsAutoPlaying(false);
-    setCurrentIndex(index);
-  };
+  }
 
   return (
     <section 
@@ -70,82 +68,25 @@ const Art_components = () => {
         </p>
       </div>
 
-      <div className="relative">
-        {/* Main Carousel Container */}
-        <div 
-          className="relative overflow-hidden bg-white"
-          data-aos="zoom-in"
-          data-aos-delay="400"
-          data-aos-duration="800"
-        >
-          {/* Slides */}
-          <div 
-            className="flex transition-transform duration-700 ease-in-out"
-            style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-          >
-            {artItems.map((art) => (
-              <div key={art.id} className="min-w-full">
-                <div className="relative">
-                  <img
-                    src={art.src}
-                    alt={art.alt}
-                    className="w-full h-[500px] sm:h-[600px] lg:h-[700px] object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-                    <h3 className="text-2xl font-serif font-bold text-white mb-1">
-                      {art.title}
-                    </h3>
-                    <p className="text-gray-200 text-sm">by {art.artist}</p>
-                  </div>
-                </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {artworks.map(art => {
+          const isHighlighted = art.id === artworkId;
+          return (
+            <div 
+              key={art.id} 
+              ref={isHighlighted ? highlightedArtworkRef : null}
+              className={`rounded-lg overflow-hidden shadow-lg transform transition-transform duration-300 hover:scale-105 ${isHighlighted ? 'ring-4 ring-yellow-500 ring-offset-2' : ''}`}
+            >
+              <div
+                style={{ backgroundImage: `url(${art.image})` }}
+                className="w-full h-64 bg-cover bg-center"
+              ></div>
+              <div className="p-4 bg-white">
+                <h3 className="text-lg font-bold text-gray-800">{art.title}</h3>
               </div>
-            ))}
-          </div>
-
-          {/* Previous Button */}
-          <button
-            onClick={goToPrevious}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
-            aria-label="Previous slide"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-
-          {/* Next Button */}
-          <button
-            onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
-            aria-label="Next slide"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Dots Indicators */}
-        <div className="flex justify-center gap-2 mt-6">
-          {artItems.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`transition-all duration-300 rounded-full ${
-                index === currentIndex
-                  ? 'bg-yellow-500 w-8 h-3'
-                  : 'bg-gray-400 w-3 h-3 hover:bg-gray-500'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-
-        {/* Auto-play indicator */}
-        <div className="text-center mt-4">
-          <button
-            onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-            className="text-sm text-gray-600 hover:text-gray-800 transition-colors"
-          >
-            {isAutoPlaying ? '⏸ Pause Auto-play' : '▶ Resume Auto-play'}
-          </button>
-        </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

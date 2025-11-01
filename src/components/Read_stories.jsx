@@ -114,11 +114,13 @@ const Read_stories = () => {
               data-aos-delay="300"
               data-aos-duration="800"
             >
-              <img 
-                src={story.image} 
-                alt={story.title} 
-                className="rounded-2xl shadow-lg max-h-[500px] object-cover"
-              />
+              <Link to={`/art/${id}`}>
+                <img 
+                  src={story.image} 
+                  alt={story.title} 
+                  className="rounded-2xl shadow-lg max-h-[500px] object-cover cursor-pointer transform transition-transform duration-300 hover:scale-105"
+                />
+              </Link>
             </div>
           )}
         </div>

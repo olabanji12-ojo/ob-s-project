@@ -56,7 +56,8 @@ const App = () => {
           <Route path='/order/complete' element={<OrderComplete_page />} />
           <Route path='payment-success' element={<Payment_success />} ></Route>
           <Route path='payment-failed' element={<Payment_failed />} ></Route>
-          <Route path='art-pages' element={<Art_pages />} ></Route>
+          <Route path='art' element={<Art_pages />} ></Route>
+          <Route path='/art/:artworkId' element={<Art_pages />} />
 
           
 

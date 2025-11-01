@@ -22,6 +22,7 @@
     "firebase": "^12.3.0",
     "firebase-admin": "^13.5.0",
     "fs": "^0.0.1-security",
+    "keen-slider": "^6.8.6",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
