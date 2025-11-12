@@ -39,7 +39,7 @@ const Featured_collection = () => {
 
   return (
     <section
-      className="py-12 px-4 sm:px-6 lg:px-8"
+      className="w-full py-12 px-4 sm:px-6 lg:px-8"
       data-aos="fade-in"
       data-aos-duration="800"
     >

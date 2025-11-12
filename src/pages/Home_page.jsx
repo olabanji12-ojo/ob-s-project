@@ -7,14 +7,13 @@ import Home_Art_Collection from '../components/Home_Art_Collection'
 const Home_page = () => {
 
   return (
-    <div>
+    <div className="w-full overflow-x-hidden">
+      <Hero />
+      <Home_Art_Collection />
+      <Featured_collection />
+      <About_section />
+</div>
 
-        <Hero/>
-        <Home_Art_Collection/>
-        <Featured_collection/>
-        <About_section/>
-
-    </div>
 
   )
 }

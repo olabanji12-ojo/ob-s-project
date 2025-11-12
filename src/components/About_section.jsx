@@ -3,7 +3,7 @@ import React from 'react';
 const About_section = () => {
   return (
     <section 
-      className="py-12 px-4 sm:px-6 lg:px-8 bg-[#f7ead7]"
+      className="w-full py-12 px-4 sm:px-6 lg:px-8 bg-[#f7ead7]"
       data-aos="fade-in"
       data-aos-duration="800"
     >
