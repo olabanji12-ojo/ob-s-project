@@ -52,3 +52,15 @@
 .arrow--disabled {
   fill: rgba(255, 255, 255, 0.5);
 }
+
+.hero-background-no-crop {
+  /* 💡 The image file path should be relative to your CSS or built output */
+  background-image: url('/knotsory1.png'); 
+  
+  /* KEY: Scales the entire image to fit within the container */
+  background-size: contain; 
+  
+  background-repeat: no-repeat;
+  background-position: center; 
+}
+

@@ -62,7 +62,7 @@ const Footer = () => {
           {/* Replace with actual social media links */}
           <a href="#" className="hover:text-white">Facebook</a>
           <a href="#" className="hover:text-white">Instagram</a>
-          <a href="#" className="hover:text-white">Pinterest</a>
+          <a href="#" className="hover:text-white">LinkedIn</a>
         </div>
       </div>
     </footer>

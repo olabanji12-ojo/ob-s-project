@@ -31,7 +31,7 @@ const About_section = () => {
           data-aos-duration="800"
         >
           <img 
-            src="/Hiring 1.jpg" 
+            src="/logo 2.png" 
             alt="Artisan crafting a tote bag"
             className="rounded-2xl shadow-lg w-full h-auto object-cover"
           />

@@ -65,6 +65,10 @@ const Home_Art_Collection = () => {
     );
   }
 
+  // Check if slider is properly initialized
+  const isSliderReady = loaded && instanceRef.current && instanceRef.current.track?.details?.slides;
+  const totalSlides = isSliderReady ? instanceRef.current.track.details.slides.length : 0;
+
   return (
     <section 
       className="py-12 px-4 sm:px-6 lg:px-8 bg-[#f7ead7]"
@@ -109,43 +113,42 @@ const Home_Art_Collection = () => {
             </div>
           ))}
         </div>
-        {loaded && instanceRef.current && (
+        
+        {/* Navigation Arrows - Only show when slider is ready */}
+        {isSliderReady && (
           <>
             <Arrow
               left
-              onClick={(e) =>
-                e.stopPropagation() || instanceRef.current?.prev()
-              }
+              onClick={(e) => {
+                e.stopPropagation();
+                instanceRef.current?.prev();
+              }}
               disabled={currentSlide === 0}
             />
 
             <Arrow
-              onClick={(e) =>
-                e.stopPropagation() || instanceRef.current?.next()
-              }
-              disabled={
-                currentSlide ===
-                instanceRef.current.track.details.slides.length - 1
-              }
+              onClick={(e) => {
+                e.stopPropagation();
+                instanceRef.current?.next();
+              }}
+              disabled={currentSlide === totalSlides - 1}
             />
           </>
         )}
       </div>
-      {loaded && instanceRef.current && (
+      
+      {/* Dots Navigation - Only show when slider is ready */}
+      {isSliderReady && (
         <div className="dots">
-          {[
-            ...Array(instanceRef.current.track.details.slides.length).keys(),
-          ].map((idx) => {
-            return (
-              <button
-                key={idx}
-                onClick={() => {
-                  instanceRef.current?.moveToIdx(idx);
-                }}
-                className={"dot" + (currentSlide === idx ? " active" : "")}
-              ></button>
-            );
-          })}
+          {[...Array(totalSlides).keys()].map((idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                instanceRef.current?.moveToIdx(idx);
+              }}
+              className={"dot" + (currentSlide === idx ? " active" : "")}
+            ></button>
+          ))}
         </div>
       )}
     </section>
@@ -153,13 +156,13 @@ const Home_Art_Collection = () => {
 };
 
 function Arrow(props) {
-  const disabeld = props.disabled ? " arrow--disabled" : "";
+  const disabled = props.disabled ? " arrow--disabled" : "";
   return (
     <svg
       onClick={props.onClick}
       className={`arrow ${
         props.left ? "arrow--left" : "arrow--right"
-      } ${disabeld}`}
+      } ${disabled}`}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
     >

@@ -8,7 +8,7 @@ const Hero = () => {
       {/* Background Image with Overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-[#f7ead7] bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/totebag.png')" }}
+        style={{ backgroundImage: "url('/Knotstory2.png')" }}
       >
         <div className="absolute inset-0 bg-opacity-40"></div>
       </div>
