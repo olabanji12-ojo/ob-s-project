@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
 
@@ -77,10 +77,11 @@ const Art_components = () => {
               ref={isHighlighted ? highlightedArtworkRef : null}
               className={`rounded-lg overflow-hidden shadow-lg transform transition-transform duration-300 hover:scale-105 ${isHighlighted ? 'ring-4 ring-yellow-500 ring-offset-2' : ''}`}
             >
+              <Link to={`/read_story/${art.id}`}>
               <div
                 style={{ backgroundImage: `url(${art.image})` }}
                 className="w-full h-64 bg-cover bg-center"
-              ></div>
+              ></div></Link>
               <div className="p-4 bg-white">
                 <h3 className="text-lg font-bold text-gray-800">{art.title}</h3>
               </div>
@@ -144,7 +145,10 @@ const toteBagImages = [
   "https://res.cloudinary.com/dhgkmjnvl/image/upload/v1761856234/tote-bags/34..jpg",
   "https://res.cloudinary.com/dhgkmjnvl/image/upload/v1761856235/tote-bags/35..jpg",
   "https://res.cloudinary.com/dhgkmjnvl/image/upload/v1761856237/tote-bags/36..jpg",
+
   "https://res.cloudinary.com/dhgkmjnvl/image/upload/v1761856243/tote-bags/Cyril.jpg",
   "https://res.cloudinary.com/dhgkmjnvl/image/upload/v1761856244/tote-bags/Kwaku.jpg",
-  "https://res.cloudinary.com/dhgkmjnvl/image/upload/v1761856245/tote-bags/Oma.jpg"
+  "https://res.cloudinary.com/dhgkmjnvl/image/upload/v1761856245/tote-bags/Oma.jpg",
+
+  
 ];

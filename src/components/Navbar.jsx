@@ -37,9 +37,11 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-serif text-[#3E3E3E] font-semibold">
+            <Link 
+            to='/'
+            className="text-2xl font-serif text-[#3E3E3E] font-semibold">
               Bomffa
-            </h1>
+            </Link>
           </div>
 
           {/* Desktop Navigation - Center */}
