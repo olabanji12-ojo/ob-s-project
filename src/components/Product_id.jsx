@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
+import { QRCodeSVG } from 'qrcode.react';
 
 const Product_id = () => {
   const { id } = useParams();
@@ -97,6 +98,32 @@ const Product_id = () => {
 
   // Placeholder image for empty or invalid cases
   const placeholderImage = "/placeholder.png";
+  
+  // QR Code URL - points to the story page for this product
+  const qrCodeURL = `${window.location.origin}/read_story/${product.id}`;
+
+  // Download QR Code function
+  const downloadQRCode = () => {
+    const svg = document.getElementById('product-qr-code');
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const pngFile = canvas.toDataURL('image/png');
+      
+      const downloadLink = document.createElement('a');
+      downloadLink.download = `QR-${product.name}-${product.id}.png`;
+      downloadLink.href = pngFile;
+      downloadLink.click();
+    };
+    
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+  };
 
   return (
     <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#f7ead7]">
@@ -167,6 +194,46 @@ const Product_id = () => {
                 ))}
               </div>
             )}
+
+            {/* QR Code Section - NEW! */}
+            <div className="mt-6 bg-white p-6 rounded-lg shadow-md border-2 border-[#8B5E3C]">
+              <h3 className="text-lg font-bold mb-3 text-center text-[#8B5E3C]">
+                📱 Scan the Story
+              </h3>
+              <div className="flex justify-center">
+                <QRCodeSVG 
+                  id="product-qr-code"
+                  value={qrCodeURL}
+                  size={200}
+                  level="H"
+                  includeMargin={true}
+                />
+              </div>
+              <p className="text-xs text-gray-600 mt-4 text-center leading-relaxed">
+                This QR code will be on your tote bag tag. Scan it anytime to read the story behind this beautiful artwork!
+              </p>
+              
+              {/* Download Button */}
+              <button
+                onClick={downloadQRCode}
+                className="mt-4 w-full bg-[#8B5E3C] hover:bg-[#6B4423] text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+              >
+                <svg 
+                  className="w-5 h-5" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth="2" 
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+                Download QR Code for Printing
+              </button>
+            </div>
           </div>
 
           {/* Product Info */}
