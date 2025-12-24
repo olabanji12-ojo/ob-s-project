@@ -19,7 +19,7 @@ const Hero = () => {
             className="inline-flex items-center gap-2 px-3 py-1 bg-[#8B5E3C]/10 rounded-full mb-6"
           >
             <span className="w-2 h-2 bg-[#8B5E3C] rounded-full"></span>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8B5E3C]">Artisanal Heritage</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8B5E3C]">Bomffa Heritage</span>
           </motion.div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-8xl font-serif font-black text-gray-900 leading-[1.1] mb-8">

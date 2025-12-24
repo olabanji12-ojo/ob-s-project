@@ -8,7 +8,7 @@ const Footer = () => {
 
         {/* Brand Section */}
         <div className="md:col-span-1">
-          <h3 className="text-xl font-bold font-serif mb-4 text-white">Artisan Totes</h3>
+          <h3 className="text-xl font-bold font-serif mb-4 text-white">Bomffa Totes</h3>
           <p className="text-sm">Handcrafted tote bags with a story to tell.</p>
         </div>
 
