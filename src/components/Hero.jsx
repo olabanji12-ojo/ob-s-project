@@ -1,71 +1,81 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion'; // 👈 Animation library
+import { motion } from 'framer-motion';
 
 const Hero = () => {
   return (
-    <section className="relative h-[600px] md:h-[650px] lg:h-[700px] w-full overflow-hidden bg-brown-800">
-      {/* Background Image with Overlay */}
-      <div 
-        className="absolute inset-0 bg-cover bg-[#f7ead7] bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('https://res.cloudinary.com/dhgkmjnvl/image/upload/v1762972408/tote-bags/Knotstory2.png')" }}
-      >
-        <div className="absolute inset-0 bg-opacity-40"></div>
+    <section className="relative min-h-[85vh] w-full overflow-hidden bg-[#FDFCFB] flex items-center">
+      {/* Decorative Elements */}
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-[#f7f3f0] -skew-x-12 translate-x-1/2 z-0 hidden lg:block"></div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+
+        {/* Left Content: Narrative */}
+        <div data-aos="fade-right" data-aos-duration="1200">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            className="inline-flex items-center gap-2 px-3 py-1 bg-[#8B5E3C]/10 rounded-full mb-6"
+          >
+            <span className="w-2 h-2 bg-[#8B5E3C] rounded-full"></span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8B5E3C]">Artisanal Heritage</span>
+          </motion.div>
+
+          <h1 className="text-5xl sm:text-6xl lg:text-8xl font-serif font-black text-gray-900 leading-[1.1] mb-8">
+            Every Bag <br />
+            <span className="italic text-[#8B5E3C] relative shadow-accent">
+              Tells
+            </span> A Story
+          </h1>
+
+          <p className="text-xl text-gray-500 font-light leading-relaxed max-w-xl mb-12">
+            Discover handcrafted tote bags, each woven with care and connected to
+            a unique narrative. Where artisanal quality meets storytelling.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link
+              to="/products"
+              className="bg-gray-900 hover:bg-[#8B5E3C] text-white px-10 py-5 rounded-2xl font-bold transition-all duration-500 shadow-xl shadow-gray-900/10 active:scale-95 text-center"
+            >
+              Explore Collection
+            </Link>
+            <Link
+              to="/art"
+              className="border-2 border-gray-100 hover:border-[#F4C430] px-10 py-5 rounded-2xl font-bold transition-all duration-500 text-center"
+            >
+              View Art Gallery
+            </Link>
+          </div>
+        </div>
+
+        {/* Right Content: Immersive Image Container */}
+        <div
+          className="relative aspect-[4/5] lg:aspect-auto lg:h-[70vh] rounded-[3rem] overflow-hidden shadow-2xl group"
+          data-aos="fade-left"
+          data-aos-duration="1200"
+        >
+          <img
+            src="https://res.cloudinary.com/dhgkmjnvl/image/upload/v1762972408/tote-bags/Knotstory2.png"
+            alt="Artisanal Tote Bag"
+            className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+
+          <div className="absolute bottom-8 left-8 right-8 p-6 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 text-white">
+            <p className="font-serif italic text-lg line-clamp-2">"This isn't just a bag; it's a piece of the soul woven into canvas."</p>
+            <div className="mt-4 flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-widest">Handmade in Nigeria</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">Est. 2024</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 sm:px-6 lg:px-8">
-        {/* Animated Heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: 'easeOut' }}
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-[Dancing Script] font-bold text-black mb-4 md:mb-6 leading-tight"
-        >
-          Every Bag Tells a Story
-        </motion.h1>
-
-        {/* Animated Paragraph */}
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: 'easeOut', delay: 0.4 }}
-          className="text-base sm:text-lg md:text-xl text-black max-w-3xl mb-8 md:mb-10 leading-relaxed px-4"
-        >
-          Discover handcrafted tote bags, each woven with care and connected to
-          a unique narrative. Where artisanal quality meets storytelling.
-        </motion.p>
-
-        {/* Button (unchanged) */}
-        <Link
-          to="/products"
-          className="bg-[#F4C430] hover:bg-[#E5B520] text-[#3E3E3E] font-semibold px-4 py-2 rounded-lg text-base transition-all duration-300 hover:shadow-lg"
-          data-aos="zoom-in"
-          data-aos-delay="300"
-          data-aos-duration="800"
-        >
-          Explore All Tote Bags
-        </Link>
-      </div>
-
-      {/* Scroll Indicator */}
-      <div 
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce hidden md:block"
-        data-aos="fade-up"
-        data-aos-delay="400"
-        data-aos-duration="800"
-      >
-        <svg 
-          className="w-6 h-6 text-white opacity-75" 
-          fill="none" 
-          strokeLinecap="round" 
-          strokeLinejoin="round" 
-          strokeWidth="2" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
-        >
-          <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-        </svg>
+      {/* Background Micro-details */}
+      <div className="absolute bottom-10 left-10 opacity-10 pointer-events-none hidden lg:block">
+        <span className="text-9xl font-serif font-black text-gray-900">OB</span>
       </div>
     </section>
   );

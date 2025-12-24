@@ -1,4 +1,44 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+@theme {
+  --font-serif: "Lora", serif;
+  --font-sans: "Inter", sans-serif;
+}
+
+:root {
+  --color-brand-primary: #8B5E3C;
+  --color-brand-secondary: #F4C430;
+  --color-bg-base: #FDFCFB;
+  --color-text-main: #1A1A1A;
+  --color-text-muted: #666666;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-base);
+  color: var(--color-text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e5e5e5;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d1d1d1;
+}
 
 .navigation-wrapper {
   position: relative;
@@ -12,54 +52,24 @@
 
 .dot {
   border: none;
-  width: 10px;
-  height: 10px;
-  background: #c5c5c5;
+  width: 8px;
+  height: 8px;
+  background: #E5E7EB;
   border-radius: 50%;
-  margin: 0 5px;
-  padding: 5px;
+  margin: 0 4px;
   cursor: pointer;
-}
-
-.dot:focus {
-  outline: none;
+  transition: all 0.3s ease;
 }
 
 .dot.active {
-  background: #000;
-}
-
-.arrow {
-  width: 30px;
-  height: 30px;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  -webkit-transform: translateY(-50%);
-  fill: #fff;
-  cursor: pointer;
-}
-
-.arrow--left {
-  left: 5px;
-}
-
-.arrow--right {
-  left: auto;
-  right: 5px;
-}
-
-.arrow--disabled {
-  fill: rgba(255, 255, 255, 0.5);
+  background: var(--color-brand-primary);
+  width: 24px;
+  border-radius: 4px;
 }
 
 .hero-background-no-crop {
-  /* 💡 The image file path should be relative to your CSS or built output */
   background-image: url('/knotsory1.png'); 
-  
-  /* KEY: Scales the entire image to fit within the container */
   background-size: contain; 
-  
   background-repeat: no-repeat;
   background-position: center; 
 }

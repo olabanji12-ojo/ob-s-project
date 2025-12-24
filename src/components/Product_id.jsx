@@ -4,6 +4,8 @@ import { useCart } from "../context/CartContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { QRCodeSVG } from 'qrcode.react';
+import { motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, ShoppingBag, Download, BookOpen } from 'lucide-react';
 
 const Product_id = () => {
   const { id } = useParams();
@@ -16,11 +18,10 @@ const Product_id = () => {
   const [error, setError] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Fetch product details from Firestore
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) {
-        setError("No product ID found in the URL.");
+        setError("No product ID found.");
         setLoading(false);
         return;
       }
@@ -37,7 +38,7 @@ const Product_id = () => {
         }
       } catch (err) {
         console.error("Error fetching product:", err);
-        setError("Failed to load product details. Please try again.");
+        setError("Failed to load product details.");
       } finally {
         setLoading(false);
       }
@@ -46,287 +47,223 @@ const Product_id = () => {
     fetchProduct();
   }, [id, navigate]);
 
-  // Handle image navigation
   const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => 
-      product.image && product.image.length > 0 
-        ? (prev - 1 + product.image.length) % product.image.length 
+    setCurrentImageIndex((prev) =>
+      product.image && product.image.length > 0
+        ? (prev - 1 + product.image.length) % product.image.length
         : 0
     );
   };
 
   const handleNextImage = () => {
-    setCurrentImageIndex((prev) => 
-      product.image && product.image.length > 0 
-        ? (prev + 1) % product.image.length 
+    setCurrentImageIndex((prev) =>
+      product.image && product.image.length > 0
+        ? (prev + 1) % product.image.length
         : 0
     );
   };
 
-  const handleThumbnailClick = (index) => {
-    setCurrentImageIndex(index);
-  };
-
-  // Add to Cart
   const handleAddToCart = async () => {
     try {
       await addToCart(product, quantity);
       navigate("/cart_page");
     } catch (e) {
       console.error("Add to cart failed:", e);
-      alert("Could not add to cart. Please try again.");
     }
   };
 
-  // Loading State
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-lg text-gray-600 animate-pulse">Loading product...</p>
-      </div>
-    );
-  }
-
-  // Error State
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-lg text-red-600">{error}</p>
-      </div>
-    );
-  }
-
-  // Placeholder image for empty or invalid cases
-  const placeholderImage = "/placeholder.png";
-  
-  // QR Code URL - points to the story page for this product
-  const qrCodeURL = `${window.location.origin}/read_story/${product.id}`;
-
-  // Download QR Code function
   const downloadQRCode = () => {
     const svg = document.getElementById('product-qr-code');
+    if (!svg) return;
     const svgData = new XMLSerializer().serializeToString(svg);
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    
+
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
       const pngFile = canvas.toDataURL('image/png');
-      
       const downloadLink = document.createElement('a');
-      downloadLink.download = `QR-${product.name}-${product.id}.png`;
+      downloadLink.download = `QR-${product.name}.png`;
       downloadLink.href = pngFile;
       downloadLink.click();
     };
-    
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
   };
 
-  return (
-    <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#f7ead7]">
-      <div className="max-w-6xl mx-auto">
-        {/* Breadcrumb */}
-        <nav className="text-sm text-gray-600 mb-6">
-          <Link to="/" className="hover:text-[#F4C430]">Home</Link> /{" "}
-          <Link to="/products" className="hover:text-[#F4C430]">Shop</Link> /{" "}
-          <span>{product.name}</span>
-        </nav>
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen bg-[#FDFCFB]">
+        <div className="w-12 h-12 border-4 border-[#8B5E3C] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-400 font-serif italic text-lg tracking-widest">Studying the details...</p>
+      </div>
+    );
+  }
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Product Image Carousel */}
-          <div className="space-y-4">
-            {/* Main Image Display */}
-            <div className="relative bg-gray-100 rounded-lg overflow-hidden" style={{ height: "500px" }}>
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen bg-[#FDFCFB] p-4 text-center">
+        <h2 className="text-3xl font-serif font-bold text-gray-900 mb-4">Something went wrong</h2>
+        <p className="text-red-500 mb-8 max-w-md">{error}</p>
+        <Link to="/products" className="bg-gray-900 text-white px-8 py-3 rounded-full font-bold">Back to Shop</Link>
+      </div>
+    );
+  }
+
+  const qrCodeURL = `${window.location.origin}/read_story/${product.id}`;
+
+  return (
+    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-[#FDFCFB]">
+      <div className="max-w-7xl mx-auto">
+        {/* Navigation & Breadcrumb */}
+        <div className="flex items-center justify-between mb-12">
+          <Link to="/products" className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
+            <ChevronLeft className="w-4 h-4" />
+            Back to Collection
+          </Link>
+          <div className="hidden sm:block">
+            <nav className="text-[10px] uppercase tracking-[0.2em] text-gray-400">
+              <Link to="/" className="hover:text-gray-900">Home</Link>
+              <span className="mx-2">/</span>
+              <Link to="/products" className="hover:text-gray-900">Shop</Link>
+              <span className="mx-2">/</span>
+              <span className="text-gray-900">{product.name}</span>
+            </nav>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 xl:gap-24 items-start">
+
+          {/* Visuals Column */}
+          <div className="space-y-8" data-aos="fade-right">
+            <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-gray-50 shadow-2xl group">
               <img
-                src={product.image && product.image.length > 0 ? product.image[currentImageIndex] : placeholderImage}
+                src={product.image && product.image.length > 0 ? product.image[currentImageIndex] : "/placeholder.jpg"}
                 alt={product.name}
-                className="w-full h-full object-cover"
-                onError={(e) => (e.target.src = placeholderImage)}
+                className="w-full h-full object-cover shadow-inner"
               />
-              {/* Navigation Arrows */}
+
               {product.image && product.image.length > 1 && (
-                <>
-                  <button
-                    onClick={handlePrevImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full shadow-lg transition"
-                  >
-                    <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                    </svg>
+                <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 flex justify-between opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <button onClick={handlePrevImage} className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white flex items-center justify-center hover:bg-white hover:text-gray-900 transition-all">
+                    <ChevronLeft className="w-6 h-6" />
                   </button>
-                  <button
-                    onClick={handleNextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full shadow-lg transition"
-                  >
-                    <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
+                  <button onClick={handleNextImage} className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white flex items-center justify-center hover:bg-white hover:text-gray-900 transition-all">
+                    <ChevronRight className="w-6 h-6" />
                   </button>
-                  {/* Image Counter */}
-                  <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
-                    <span>{currentImageIndex + 1}</span> / <span>{product.image?.length || 1}</span>
-                  </div>
-                </>
+                </div>
               )}
+
+              {/* Counter */}
+              <div className="absolute bottom-8 right-8 bg-gray-900/10 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black text-gray-900 border border-gray-900/5">
+                {currentImageIndex + 1} / {product.image?.length || 1}
+              </div>
             </div>
 
-            {/* Thumbnail Gallery */}
-            {product.image && product.image.length > 0 && (
-              <div className="grid grid-cols-4 gap-3">
+            {/* Thumbnails */}
+            {product.image && product.image.length > 1 && (
+              <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
                 {product.image.map((img, index) => (
                   <button
                     key={index}
-                    onClick={() => handleThumbnailClick(index)}
-                    className={`border-2 rounded-lg overflow-hidden ${
-                      index === currentImageIndex ? "border-[#8B5E3C]" : "border-gray-300"
-                    }`}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`flex-shrink-0 w-24 h-32 rounded-2xl overflow-hidden border-4 transition-all ${index === currentImageIndex ? "border-[#8B5E3C] scale-105" : "border-transparent opacity-60"
+                      }`}
                   >
-                    <img
-                      src={img}
-                      alt={`${product.name} thumbnail ${index + 1}`}
-                      className="w-full h-24 object-cover"
-                      onError={(e) => (e.target.src = placeholderImage)}
-                    />
+                    <img src={img} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
             )}
-
-            {/* QR Code Section - NEW! */}
-            <div className="mt-6 bg-white p-6 rounded-lg shadow-md border-2 border-[#8B5E3C]">
-              <h3 className="text-lg font-bold mb-3 text-center text-[#8B5E3C]">
-                📱 Scan the Story
-              </h3>
-              <div className="flex justify-center">
-                <QRCodeSVG 
-                  id="product-qr-code"
-                  value={qrCodeURL}
-                  size={200}
-                  level="H"
-                  includeMargin={true}
-                />
-              </div>
-              <p className="text-xs text-gray-600 mt-4 text-center leading-relaxed">
-                This QR code will be on your tote bag tag. Scan it anytime to read the story behind this beautiful artwork!
-              </p>
-              
-              {/* Download Button */}
-              <button
-                onClick={downloadQRCode}
-                className="mt-4 w-full bg-[#8B5E3C] hover:bg-[#6B4423] text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-              >
-                <svg 
-                  className="w-5 h-5" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth="2" 
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  />
-                </svg>
-                Download QR Code for Printing
-              </button>
-            </div>
           </div>
 
-          {/* Product Info */}
-          <div className="space-y-6">
-            <h1 className="text-3xl sm:text-4xl font-serif font-bold text-gray-800">
-              {product.name}
-            </h1>
-
-            {/* Rating */}
-            <div className="flex items-center gap-2">
-              <div className="flex gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-yellow-400 text-xl">★</span>
-                ))}
+          {/* Details Column */}
+          <div className="space-y-10" data-aos="fade-left">
+            <div>
+              <div className="flex items-center gap-2 text-[#8B5E3C] mb-4">
+                <span className="w-2 h-2 bg-[#8B5E3C] rounded-full"></span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Exquisite Craftsmanship</span>
               </div>
-              <span className="text-gray-600">(24 reviews)</span>
+              <h1 className="text-5xl sm:text-6xl font-serif font-black text-gray-900 leading-tight mb-6">
+                {product.name}
+              </h1>
+              <div className="flex items-center gap-6">
+                <p className="text-4xl font-bold text-[#8B5E3C]">
+                  ₦{product.price?.toLocaleString()}
+                </p>
+                <div className="h-8 w-[1px] bg-gray-200"></div>
+                <div className="flex gap-1 text-[#F4C430]">
+                  {[...Array(5)].map((_, i) => <span key={i} className="text-xl">★</span>)}
+                </div>
+              </div>
             </div>
 
-            {/* Price */}
-            <p className="text-4xl font-bold text-[#8B5E3C]">
-              ₦{product.price?.toLocaleString()}
-            </p>
-
-            {/* Remaining Stock */}
-            <p className="text-sm text-gray-700">
-              <strong>Available:</strong> {product.stock ?? "N/A"} in stock
-            </p>
-
-            {/* Description */}
-            <div className="border-t border-b border-gray-200 py-6">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Description</h3>
-              <p className="text-gray-600 leading-relaxed">{product.description}</p>
+            <div className="space-y-6">
+              <h3 className="text-[10px] uppercase tracking-widest font-black text-gray-400">The Narrative</h3>
+              <p className="text-xl text-gray-500 font-light leading-relaxed">
+                {product.description || "Every stitch in this piece tells a tale of tradition, resilience, and art. Handcrafted to accompany you on your own unique journey."}
+              </p>
             </div>
 
-            {/* Add to Cart */}
-            <button
-              onClick={handleAddToCart}
-              disabled={!product.stock || product.stock < 1}
-              className={`w-full font-bold py-4 rounded-lg transition duration-300 flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl ${
-                product.stock > 0
-                  ? "bg-[#8B5E3C] hover:bg-[#6B4423] text-white"
-                  : "bg-gray-400 cursor-not-allowed text-gray-100"
-              }`}
-            >
-              {product.stock > 0
-                ? `Add to Cart - ₦${(product.price * quantity).toLocaleString()}`
-                : "Out of Stock"}
-            </button>
+            <div className="p-8 bg-[#f7f3f0] rounded-[2rem] space-y-8 relative overflow-hidden group">
+              <div className="flex items-start gap-8 relative z-10">
+                <div className="bg-white p-4 rounded-3xl shadow-lg border border-gray-100 transition-transform duration-500 group-hover:rotate-6">
+                  <QRCodeSVG
+                    id="product-qr-code"
+                    value={qrCodeURL}
+                    size={120}
+                    level="H"
+                    includeMargin={false}
+                  />
+                </div>
+                <div>
+                  <h4 className="text-lg font-serif font-bold text-gray-900 mb-2 italic">A Story Woven In...</h4>
+                  <p className="text-sm text-gray-500 leading-relaxed mb-4">Every bag comes with a unique tag. Scan it to meet the artisan and hear the inspiration behind this artwork.</p>
+                  <button onClick={downloadQRCode} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#8B5E3C] hover:text-gray-900 transition-all">
+                    <Download className="w-4 h-4" />
+                    Archive QR Design
+                  </button>
+                </div>
+              </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gray-200/20 -translate-y-12 translate-x-12 rounded-full"></div>
+            </div>
 
-            {/* Story Link */}
-            <Link
-              to={`/read_story/${product.id}`}
-              className="inline-flex items-center justify-center gap-2 bg-[#F4C430] text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-[#e3b920] hover:shadow-lg transition duration-300 text-base sm:text-lg"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={handleAddToCart}
+                disabled={!product.stock || product.stock < 1}
+                className={`flex-[2] py-6 px-10 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-500 shadow-2xl active:scale-95 ${product.stock > 0
+                    ? "bg-gray-900 text-white hover:bg-[#8B5E3C] shadow-gray-900/20"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  }`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 20l9-5-9-5-9 5 9 5zM3 10l9-5 9 5"
-                />
-              </svg>
-              Read the Story
-            </Link>
+                <ShoppingBag className="w-5 h-5" />
+                {product.stock > 0 ? "Add To Collection" : "Sold Out"}
+              </button>
+
+              <Link
+                to={`/read_story/${product.id}`}
+                className="flex-1 py-6 px-10 rounded-2xl border-2 border-gray-100 font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:border-[#F4C430] hover:bg-[#F4C430]/5 transition-all duration-500 active:scale-95"
+              >
+                <BookOpen className="w-5 h-5" />
+                Story
+              </Link>
+            </div>
+
+            <div className="pt-8 flex items-center gap-8 border-t border-gray-100">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase text-gray-400 tracking-tighter">Availability</span>
+                <span className="font-bold text-gray-900">{product.stock || 0} pieces left</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase text-gray-400 tracking-tighter">Shipping</span>
+                <span className="font-bold text-gray-900">Crafted 48h</span>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Back Button */}
-        <Link
-          to="/products"
-          className="inline-flex items-center text-[#8B5E3C] hover:text-[#6B4423] font-semibold mt-6 transition"
-        >
-          <svg
-            className="w-5 h-5 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Back to Shop
-        </Link>
       </div>
     </section>
   );

@@ -50,7 +50,7 @@ const Featured_collection = () => {
           data-aos-delay="100"
           data-aos-duration="800"
         >
-          Featured Collection
+          View Collectibles
         </h2>
         <p
           className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto"

@@ -14,6 +14,7 @@ import { Routes, Route, Outlet } from "react-router-dom";
 import Payment_success from './components/Payment_success'
 import Payment_failed from './components/Payment_failed'
 import Art_pages from './pages/Art_pages'
+import Admin_page from './pages/Admin_page'
 
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -58,13 +59,14 @@ const App = () => {
           <Route path='payment-failed' element={<Payment_failed />} ></Route>
           <Route path='art' element={<Art_pages />} ></Route>
           <Route path='/art/:artworkId' element={<Art_pages />} />
+          <Route path='/admin' element={<Admin_page />} />
 
-          
+
 
           {/* Add more pages like below */}
           {/* <Route path="about" element={<About />} /> */}
           {/* <Route path="contact" element={<Contact />} /> */}
-          
+
         </Route>
       </Routes>
     </div>

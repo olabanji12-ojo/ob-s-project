@@ -68,6 +68,25 @@ const Read_stories = () => {
         {/* Story layout */}
         <div className="grid md:grid-cols-2 gap-8 items-start">
           
+
+          {/* Story Image */}
+          {story.image && (
+            <div
+              className="flex justify-center md:justify-end"
+              data-aos="fade-left"
+              data-aos-delay="300"
+              data-aos-duration="800"
+            >
+              <Link to={`/art/${id}`}>
+                <img 
+                  src={story.image} 
+                  alt={story.title} 
+                  className="rounded-2xl shadow-lg max-h-[500px] object-cover cursor-pointer transform transition-transform duration-300 hover:scale-105"
+                />
+              </Link>
+            </div>
+          )}
+          
           {/* Story Text */}
           <div
             data-aos="fade-up"
@@ -106,23 +125,8 @@ const Read_stories = () => {
             </Link>
           </div>
 
-          {/* Story Image */}
-          {story.image && (
-            <div
-              className="flex justify-center md:justify-end"
-              data-aos="fade-left"
-              data-aos-delay="300"
-              data-aos-duration="800"
-            >
-              <Link to={`/art/${id}`}>
-                <img 
-                  src={story.image} 
-                  alt={story.title} 
-                  className="rounded-2xl shadow-lg max-h-[500px] object-cover cursor-pointer transform transition-transform duration-300 hover:scale-105"
-                />
-              </Link>
-            </div>
-          )}
+          
+
         </div>
       </div>
     </section>
