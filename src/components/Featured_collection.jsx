@@ -80,6 +80,7 @@ const Featured_collection = () => {
                 src={item.image && item.image.length > 0 ? item.image[0] : "/placeholder.jpg"}
                 alt={item.name}
                 className="w-full h-64 object-cover rounded-md mb-4"
+                onError={(e) => (e.target.src = "/placeholder.jpg")}
               />
               <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
               <p className="text-yellow-600 font-bold mt-2">
@@ -96,11 +97,10 @@ const Featured_collection = () => {
 
               <Link
                 to={`/product/${item.id}`}
-                className={`mt-4 inline-block ${
-                  item.stock > 0
+                className={`mt-4 inline-block ${item.stock > 0
                     ? "bg-yellow-400 hover:bg-yellow-500"
                     : "bg-gray-400 cursor-not-allowed"
-                } text-gray-800 font-semibold py-2 px-6 rounded-lg transition-colors duration-300`}
+                  } text-gray-800 font-semibold py-2 px-6 rounded-lg transition-colors duration-300`}
               >
                 View Details
               </Link>

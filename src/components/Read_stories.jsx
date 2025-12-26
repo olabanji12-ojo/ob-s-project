@@ -46,28 +46,28 @@ const Read_stories = () => {
   }
 
   return (
-    <section 
+    <section
       className="py-12 px-4 sm:px-6 lg:px-8 bg-[#f7ead7]"
       data-aos="fade-in"
       data-aos-duration="800"
     >
       <div className="max-w-5xl mx-auto">
         {/* Breadcrumb */}
-        <nav 
+        <nav
           className="text-sm text-gray-600 mb-6"
           data-aos="fade-right"
           data-aos-delay="100"
           data-aos-duration="800"
         >
-          <Link to="/" className="hover:text-yellow-500">Home</Link> / 
-          <Link to="/products" className="hover:text-yellow-500">Shop</Link> / 
-          <Link to={`/product/${id}`} className="hover:text-yellow-500">Product</Link> / 
+          <Link to="/" className="hover:text-yellow-500">Home</Link> /
+          <Link to="/products" className="hover:text-yellow-500">Shop</Link> /
+          <Link to={`/product/${id}`} className="hover:text-yellow-500">Product</Link> /
           <span>Read the Story</span>
         </nav>
 
         {/* Story layout */}
         <div className="grid md:grid-cols-2 gap-8 items-start">
-          
+
 
           {/* Story Image */}
           {story.image && (
@@ -78,15 +78,16 @@ const Read_stories = () => {
               data-aos-duration="800"
             >
               <Link to={`/art/${id}`}>
-                <img 
-                  src={story.image} 
-                  alt={story.title} 
+                <img
+                  src={story.image}
+                  alt={story.title}
                   className="rounded-2xl shadow-lg max-h-[500px] object-cover cursor-pointer transform transition-transform duration-300 hover:scale-105"
+                  onError={(e) => (e.target.src = "/placeholder.jpg")}
                 />
               </Link>
             </div>
           )}
-          
+
           {/* Story Text */}
           <div
             data-aos="fade-up"
@@ -101,8 +102,8 @@ const Read_stories = () => {
             </p>
 
             {/* Back to Product Button */}
-            <Link 
-              to={`/product/${id}`} 
+            <Link
+              to={`/product/${id}`}
               className="inline-flex items-center text-[#8B5E3C] hover:text-[#6B4423] font-semibold mt-8 transition text-base sm:text-lg"
               data-aos="fade-left"
               data-aos-delay="400"
@@ -125,7 +126,7 @@ const Read_stories = () => {
             </Link>
           </div>
 
-          
+
 
         </div>
       </div>

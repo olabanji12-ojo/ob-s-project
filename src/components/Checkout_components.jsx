@@ -27,30 +27,31 @@ const Checkout_components = () => {
   // ✅ Check stock availability before checkout
   const checkStockForCart = async (cartItems) => {
     const outOfStockItems = [];
-  
+
     for (const item of cartItems) {
       const productRef = doc(db, "products", item.productId);  // ✅ Use productId
       const productSnap = await getDoc(productRef);
-  
+
       if (!productSnap.exists()) {
         outOfStockItems.push(item.name + " (not found)");
         continue;
       }
-  
+
       const productData = productSnap.data();
       if (productData.stock < item.quantity) {
         outOfStockItems.push(`${item.name} (only ${productData.stock} left)`);
       }
     }
-  
+
     if (outOfStockItems.length > 0) {
+      // Note: We could use showNotification here if we passed it in, but alert is fine for now as per plan
       alert("The following items are out of stock:\n\n" + outOfStockItems.join("\n"));
       return { ok: false };
     }
-  
+
     return { ok: true };
   };
-  
+
 
   // ✅ Update product stock after successful payment
   const updateProductStock = async (cartItems) => {
@@ -64,7 +65,7 @@ const Checkout_components = () => {
       }
     }
   };
-  
+
 
   // Prefill user info
   useEffect(() => {
@@ -155,7 +156,7 @@ const Checkout_components = () => {
                 totalPrice: totalPrice
               }),
             });
-        
+
             let data;
             try {
               data = await res.json();
@@ -166,15 +167,15 @@ const Checkout_components = () => {
             }
 
             console.log("Verification response:", data);
-        
+
             if (data.verified) {
               clearCart();
-              navigate("/payment-success", { 
-                state: { 
+              navigate("/payment-success", {
+                state: {
                   reference: transaction.reference,
                   amount: totalPrice * 100,
                   status: transaction.status || 'success'
-                } 
+                }
               });
             } else {
               navigate("/payment-failed");
@@ -184,7 +185,7 @@ const Checkout_components = () => {
             navigate("/payment-failed");
           }
         },
-        
+
         onCancel: () => {
           navigate('/payment-failed', { state: { reason: 'User canceled payment' } });
         },
@@ -203,7 +204,7 @@ const Checkout_components = () => {
 
     setLoading(false);
   };
-  
+
 
   return (
     <div
@@ -432,7 +433,7 @@ const Checkout_components = () => {
                     src={item.image && item.image.length > 0 ? item.image[0] : "/placeholder.png"}
                     alt={item.name}
                     className="w-16 h-16 object-cover rounded-md mr-4"
-                    onError={(e) => (e.target.src = "/placeholder.png")}
+                    onError={(e) => (e.target.src = "/placeholder.jpg")}
                   />
                   <div>
                     <p className="font-medium">{item.name}</p>

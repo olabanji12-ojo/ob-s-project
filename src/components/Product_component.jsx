@@ -101,6 +101,7 @@ const Product_component = () => {
                       src={item.image && item.image.length > 0 ? item.image[0] : "/placeholder.jpg"}
                       alt={item.name}
                       className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => (e.target.src = "/placeholder.jpg")}
                     />
                     {item.stock <= 5 && item.stock > 0 && (
                       <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[#8B5E3C] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-sm">

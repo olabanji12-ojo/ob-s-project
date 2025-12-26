@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import Toast from '../components/utils/Toast';
 import {
   collection,
   deleteDoc,
@@ -79,7 +80,16 @@ export function CartProvider({ children }) {
   const { currentUser } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState({ message: '', type: 'info', isVisible: false });
   const mergeRef = useRef(false);
+
+  const showNotification = (message, type = 'info') => {
+    setNotification({ message, type, isVisible: true });
+  };
+
+  const closeNotification = () => {
+    setNotification((prev) => ({ ...prev, isVisible: false }));
+  };
 
   const isGuest = !currentUser;
 
@@ -225,7 +235,7 @@ export function CartProvider({ children }) {
       writeGuestCart(current);
       setItems([...current]);
     } catch (err) {
-      alert(err.message);
+      showNotification(err.message, 'error');
     }
   }
 
@@ -245,7 +255,7 @@ export function CartProvider({ children }) {
         await addToCartFirestore(product, quantity);
       }
     } catch (err) {
-      alert(err.message);
+      showNotification(err.message, 'error');
     }
   }
 
@@ -255,26 +265,30 @@ export function CartProvider({ children }) {
   async function updateQuantity(productId, newQuantity) {
     if (newQuantity <= 0) return removeFromCart(productId);
 
-    await checkStock(productId, newQuantity);
+    try {
+      await checkStock(productId, newQuantity);
 
-    if (isGuest) {
-      const current = readGuestCart();
-      const idx = current.findIndex((it) => it.productId === productId);
-      if (idx >= 0) {
-        current[idx] = { ...current[idx], quantity: newQuantity };
-        writeGuestCart(current);
-        setItems([...current]);
+      if (isGuest) {
+        const current = readGuestCart();
+        const idx = current.findIndex((it) => it.productId === productId);
+        if (idx >= 0) {
+          current[idx] = { ...current[idx], quantity: newQuantity };
+          writeGuestCart(current);
+          setItems([...current]);
+        }
+        return;
       }
-      return;
-    }
 
-    const uid = currentUser.uid;
-    const id = itemDocId(uid, productId);
-    const ref = doc(db, 'cart', id);
-    await updateDoc(ref, {
-      quantity: newQuantity,
-      updatedAt: serverTimestamp(),
-    });
+      const uid = currentUser.uid;
+      const id = itemDocId(uid, productId);
+      const ref = doc(db, 'cart', id);
+      await updateDoc(ref, {
+        quantity: newQuantity,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (err) {
+      showNotification(err.message, 'error');
+    }
   }
 
   async function removeFromCart(productId) {
@@ -317,5 +331,15 @@ export function CartProvider({ children }) {
     isGuest,
   };
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+      <Toast
+        message={notification.message}
+        type={notification.type}
+        isVisible={notification.isVisible}
+        onClose={closeNotification}
+      />
+    </CartContext.Provider>
+  );
 }

@@ -9,13 +9,13 @@ const Cart_components = () => {
   const navigate = useNavigate();
 
   return (
-    <section 
+    <section
       className="py-8 md:py-16 px-4 bg-[#FAF8F5] min-h-screen"
       data-aos="fade-in"
       data-aos-duration="800"
     >
       <div className="max-w-6xl mx-auto">
-        <h1 
+        <h1
           className="text-2xl md:text-3xl lg:text-4xl font-serif font-bold mb-8 md:mb-12 text-[#3E3E3E] text-center"
           data-aos="fade-up"
           data-aos-delay="100"
@@ -23,10 +23,10 @@ const Cart_components = () => {
         >
           Shopping Cart
         </h1>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Cart Items (Left Side - 2/3 width) */}
-          <div 
+          <div
             className="lg:col-span-2 space-y-4 md:space-y-6"
             data-aos="fade-left"
             data-aos-delay="200"
@@ -48,9 +48,9 @@ const Cart_components = () => {
                       src={item.image && item.image.length > 0 ? item.image[0] : "/placeholder.png"}
                       alt={item.name}
                       className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded flex-shrink-0"
-                      onError={(e) => (e.target.src = "/placeholder.png")}
+                      onError={(e) => (e.target.src = "/placeholder.jpg")}
                     />
-                    
+
                     {/* Product Info & Controls */}
                     <div className="flex-1 flex flex-col justify-between min-w-0">
                       {/* Name and Remove Button Row */}
@@ -58,8 +58,12 @@ const Cart_components = () => {
                         <h3 className="text-base sm:text-lg font-semibold text-[#3E3E3E] line-clamp-2">
                           {item.name}
                         </h3>
-                        <button 
-                          onClick={() => removeFromCart(item.productId || item.id)}
+                        <button
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to remove this item from your cart?")) {
+                              removeFromCart(item.productId || item.id);
+                            }
+                          }}
                           className="text-red-500 hover:text-red-700 transition flex-shrink-0 p-1"
                           aria-label="Remove item"
                         >
@@ -78,12 +82,12 @@ const Cart_components = () => {
                           </svg>
                         </button>
                       </div>
-                      
+
                       {/* Price */}
                       <p className="text-base sm:text-lg text-[#D4785C] font-semibold">
                         ₦{item.price.toLocaleString()}
                       </p>
-                      
+
                       {/* Quantity Controls and Total */}
                       <div className="flex items-center justify-between mt-2">
                         {/* Quantity Controls */}
@@ -98,7 +102,7 @@ const Cart_components = () => {
                             +
                           </button>
                         </div>
-                        
+
                         {/* Item Total */}
                         <div className="text-base sm:text-lg font-bold text-[#3E3E3E]">
                           ₦{(item.price * item.quantity).toLocaleString()}
@@ -109,7 +113,7 @@ const Cart_components = () => {
                 </div>
               ))
             ) : (
-              <div 
+              <div
                 className="bg-white rounded-lg p-12 text-center"
                 data-aos="fade-up"
                 data-aos-delay="300"
@@ -140,14 +144,14 @@ const Cart_components = () => {
           </div>
 
           {/* Order Summary (Right Side - 1/3 width) */}
-          <div 
+          <div
             className="lg:col-span-1"
             data-aos="fade-right"
             data-aos-delay="200"
             data-aos-duration="800"
           >
             <div className="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-gray-200 lg:sticky lg:top-20">
-              <h2 
+              <h2
                 className="text-xl sm:text-2xl font-serif font-bold mb-4 sm:mb-6 text-[#3E3E3E]"
                 data-aos="fade-right"
                 data-aos-delay="300"
@@ -155,9 +159,9 @@ const Cart_components = () => {
               >
                 Order Summary
               </h2>
-              
+
               {/* Items */}
-              <div 
+              <div
                 className="flex justify-between mb-3 text-sm sm:text-base"
                 data-aos="fade-right"
                 data-aos-delay="400"
@@ -170,9 +174,9 @@ const Cart_components = () => {
                   ₦{totalPrice.toLocaleString()}
                 </span>
               </div>
-              
+
               {/* Shipping */}
-              <div 
+              <div
                 className="flex justify-between mb-4 sm:mb-6 text-sm sm:text-base"
                 data-aos="fade-right"
                 data-aos-delay="450"
@@ -181,17 +185,17 @@ const Cart_components = () => {
                 <span className="text-gray-600">Shipping</span>
                 <span className="text-[#3E3E3E] font-semibold">Free</span>
               </div>
-              
+
               {/* Divider */}
-              <div 
+              <div
                 className="border-t border-gray-300 my-4"
                 data-aos="fade-right"
                 data-aos-delay="500"
                 data-aos-duration="800"
               ></div>
-              
+
               {/* Total */}
-              <div 
+              <div
                 className="flex justify-between mb-6"
                 data-aos="fade-right"
                 data-aos-delay="550"
@@ -202,7 +206,7 @@ const Cart_components = () => {
                   ₦{totalPrice.toLocaleString()}
                 </span>
               </div>
-              
+
               {/* Proceed to Checkout */}
               <button
                 onClick={async () => {
@@ -215,7 +219,7 @@ const Cart_components = () => {
               >
                 Proceed to Checkout
               </button>
-              
+
               {/* Continue Shopping */}
               <Link
                 to="/products"

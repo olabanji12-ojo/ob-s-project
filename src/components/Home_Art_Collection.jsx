@@ -115,6 +115,7 @@ const Home_Art_Collection = () => {
                       src={art.image}
                       alt={art.title}
                       className="w-full h-full object-cover grayscale-[20%] group-hover/card:grayscale-0 transition-all duration-700"
+                      onError={(e) => (e.target.src = "/placeholder.jpg")}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
                       <p className="text-[10px] uppercase tracking-widest text-[#F4C430] font-black mb-2 opacity-0 group-hover/card:opacity-100 transition-all duration-500 transform translate-y-4 group-hover/card:translate-y-0">The Story</p>

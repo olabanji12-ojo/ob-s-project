@@ -143,6 +143,7 @@ const Product_id = () => {
                 src={product.image && product.image.length > 0 ? product.image[currentImageIndex] : "/placeholder.jpg"}
                 alt={product.name}
                 className="w-full h-full object-cover shadow-inner"
+                onError={(e) => (e.target.src = "/placeholder.jpg")}
               />
 
               {product.image && product.image.length > 1 && (
@@ -235,8 +236,8 @@ const Product_id = () => {
                 onClick={handleAddToCart}
                 disabled={!product.stock || product.stock < 1}
                 className={`flex-[2] py-6 px-10 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-500 shadow-2xl active:scale-95 ${product.stock > 0
-                    ? "bg-gray-900 text-white hover:bg-[#8B5E3C] shadow-gray-900/20"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  ? "bg-gray-900 text-white hover:bg-[#8B5E3C] shadow-gray-900/20"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
                   }`}
               >
                 <ShoppingBag className="w-5 h-5" />
