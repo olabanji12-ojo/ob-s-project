@@ -6,9 +6,11 @@ import {
     addDoc,
     updateDoc,
     deleteDoc,
-    doc
+    doc,
+    setDoc
 } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
+import { uploadToCloudinary } from '../utils/cloudinaryConfig';
 
 const Admin_dashboard = () => {
     const [activeTab, setActiveTab] = useState('products');
@@ -17,6 +19,8 @@ const Admin_dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     // Form states
     const [productForm, setProductForm] = useState({
@@ -30,7 +34,8 @@ const Admin_dashboard = () => {
     const [storyForm, setStoryForm] = useState({
         title: '',
         content: '',
-        image: ''
+        image: '',
+        productId: '' // Link to a product
     });
 
     useEffect(() => {
@@ -80,10 +85,12 @@ const Admin_dashboard = () => {
             setStoryForm({
                 title: item.title || '',
                 content: item.content || '',
-                image: item.image || ''
+                image: item.image || '',
+                productId: item.id || ''
             });
             setActiveTab('stories');
         }
+        setSelectedFile(null);
         setIsModalOpen(true);
     };
 
@@ -101,32 +108,69 @@ const Admin_dashboard = () => {
             setStoryForm({
                 title: '',
                 content: '',
-                image: ''
+                image: '',
+                productId: ''
             });
         }
+        setSelectedFile(null);
         setIsModalOpen(true);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const collectionName = activeTab;
-        const formData = activeTab === 'products' ? {
-            ...productForm,
-            price: Number(productForm.price),
-            stock: Number(productForm.stock)
-        } : storyForm;
+        setUploading(true);
 
         try {
-            if (editingItem) {
-                await updateDoc(doc(db, collectionName, editingItem.id), formData);
+            let finalImageUrl = activeTab === 'products' ? productForm.image[0] : storyForm.image;
+
+            // Handle file upload if a file is selected
+            if (selectedFile) {
+                try {
+                    finalImageUrl = await uploadToCloudinary(selectedFile);
+                } catch (uploadError) {
+                    alert("Image upload failed: " + uploadError.message);
+                    setUploading(false);
+                    return;
+                }
+            }
+
+            if (activeTab === 'products') {
+                const formData = {
+                    ...productForm,
+                    price: Number(productForm.price),
+                    stock: Number(productForm.stock),
+                    image: [finalImageUrl]
+                };
+                if (editingItem) {
+                    await updateDoc(doc(db, 'products', editingItem.id), formData);
+                } else {
+                    await addDoc(collection(db, 'products'), formData);
+                }
             } else {
-                await addDoc(collection(db, collectionName), formData);
+                // Story logic
+                if (!storyForm.productId) {
+                    alert("Please select a product for this story.");
+                    setUploading(false);
+                    return;
+                }
+                const storyData = {
+                    title: storyForm.title,
+                    content: storyForm.content,
+                    image: finalImageUrl
+                };
+
+                // Use the Product ID as the Story Document ID
+                await setDoc(doc(db, 'stories', storyForm.productId), storyData);
             }
             setIsModalOpen(false);
+            setSelectedFile(null);
             fetchData();
         } catch (error) {
             console.error("Error saving document:", error);
             alert("Failed to save. Check console for details.");
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -339,18 +383,43 @@ const Admin_dashboard = () => {
                                             ></textarea>
                                         </div>
                                         <div>
-                                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2 block">Visual Asset URL</label>
-                                            <input
-                                                type="text"
-                                                placeholder="https://cloudinary.com/..."
-                                                value={productForm.image[0]}
-                                                onChange={(e) => setProductForm({ ...productForm, image: [e.target.value] })}
-                                                className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium"
-                                            />
+                                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2 block">Upload Product Image</label>
+                                            <div className="flex flex-col gap-3">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                                                    className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100"
+                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-bold text-gray-300 whitespace-nowrap">OR URL</span>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="https://cloudinary.com/..."
+                                                        value={productForm.image[0]}
+                                                        onChange={(e) => setProductForm({ ...productForm, image: [e.target.value] })}
+                                                        className="flex-1 bg-gray-50 border-0 rounded-2xl px-5 py-2 text-sm text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </>
                                 ) : (
                                     <>
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2 block">Linked Product</label>
+                                            <select
+                                                required
+                                                value={storyForm.productId}
+                                                onChange={(e) => setStoryForm({ ...storyForm, productId: e.target.value })}
+                                                className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium appearance-none"
+                                            >
+                                                <option value="">Select a product...</option>
+                                                {products.map(p => (
+                                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
                                         <div>
                                             <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2 block">Artist/Title</label>
                                             <input
@@ -374,14 +443,25 @@ const Admin_dashboard = () => {
                                             ></textarea>
                                         </div>
                                         <div>
-                                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2 block">Exhibition Image URL</label>
-                                            <input
-                                                type="text"
-                                                placeholder="https://..."
-                                                value={storyForm.image}
-                                                onChange={(e) => setStoryForm({ ...storyForm, image: e.target.value })}
-                                                className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium"
-                                            />
+                                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2 block">Upload Exhibition Image</label>
+                                            <div className="flex flex-col gap-3">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                                                    className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100"
+                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-bold text-gray-300 whitespace-nowrap">OR URL</span>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="https://..."
+                                                        value={storyForm.image}
+                                                        onChange={(e) => setStoryForm({ ...storyForm, image: e.target.value })}
+                                                        className="flex-1 bg-gray-50 border-0 rounded-2xl px-5 py-2 text-sm text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </>
                                 )}
@@ -396,9 +476,17 @@ const Admin_dashboard = () => {
                                     </button>
                                     <button
                                         type="submit"
-                                        className="flex-[2] bg-gray-900 text-white font-black py-4 rounded-2xl hover:bg-yellow-600 shadow-xl shadow-yellow-600/20 active:scale-95 transition-all"
+                                        disabled={uploading}
+                                        className={`flex-[2] bg-gray-900 text-white font-black py-4 rounded-2xl hover:bg-yellow-600 shadow-xl shadow-yellow-600/20 active:scale-95 transition-all flex items-center justify-center ${uploading ? 'opacity-70 cursor-not-allowed' : ''}`}
                                     >
-                                        {editingItem ? 'APPLY CHANGES' : 'PUBLISH NOW'}
+                                        {uploading ? (
+                                            <>
+                                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                                UPLOADING...
+                                            </>
+                                        ) : (
+                                            editingItem ? 'APPLY CHANGES' : 'PUBLISH NOW'
+                                        )}
                                     </button>
                                 </div>
                             </form>

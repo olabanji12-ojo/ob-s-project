@@ -1,6 +1,6 @@
 // src/contexts/AuthContext.js
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { 
+import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
@@ -8,7 +8,7 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
-   
+
 } from 'firebase/auth';
 import { auth } from '../firebase/firebase';
 
@@ -21,16 +21,21 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Sign up function
   function signup(email, password, displayName) {
     return createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+      .then(async (userCredential) => {
         // Update display name
-        return updateProfile(userCredential.user, {
+        await updateProfile(userCredential.user, {
           displayName: displayName
         });
+
+        // Initial user document creation is optional here, 
+        // but we assume admins are set manually in Firestore for now.
+        return userCredential.user;
       });
   }
 
@@ -58,8 +63,27 @@ export function AuthProvider({ children }) {
 
   // Listen for auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      if (user) {
+        try {
+          // Fetch user role from Firestore
+          const { doc, getDoc } = await import('firebase/firestore');
+          const { db } = await import('../firebase/firebase');
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+
+          if (userDoc.exists()) {
+            setIsAdmin(userDoc.data().role === 'admin');
+          } else {
+            setIsAdmin(false);
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
       setLoading(false);
     });
 
@@ -68,6 +92,8 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
+    isAdmin,
+    loading,
     signup,
     login,
     logout,
