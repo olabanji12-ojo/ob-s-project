@@ -101,9 +101,9 @@ const Read_stories = () => {
               {story.content || 'No story content available.'}
             </p>
 
-            {/* Back to Product Button */}
+            {/* Back to Products Gallery Button */}
             <Link
-              to={`/product/${id}`}
+              to={`/products`}
               className="inline-flex items-center text-[#8B5E3C] hover:text-[#6B4423] font-semibold mt-8 transition text-base sm:text-lg"
               data-aos="fade-left"
               data-aos-delay="400"
@@ -122,7 +122,7 @@ const Read_stories = () => {
                   d="M15 19l-7-7 7-7"
                 />
               </svg>
-              Back to Product
+              View Collectibles
             </Link>
           </div>
 
