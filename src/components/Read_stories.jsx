@@ -103,7 +103,7 @@ const Read_stories = () => {
 
             {/* Back to Products Gallery Button */}
             <Link
-              to={`/products`}
+              to={`/product/${id}`}
               className="inline-flex items-center text-[#8B5E3C] hover:text-[#6B4423] font-semibold mt-8 transition text-base sm:text-lg"
               data-aos="fade-left"
               data-aos-delay="400"
