@@ -57,7 +57,7 @@ const Hero = () => {
           data-aos-duration="1200"
         >
           <img
-            src="https://res.cloudinary.com/dhgkmjnvl/image/upload/v1762972408/tote-bags/Knotstory2.png"
+            src="https://res.cloudinary.com/dhgkmjnvl/image/upload/v1768606093/tote-bags/hero_image2.jpg"
             alt="Artisanal Tote Bag"
             className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
           />

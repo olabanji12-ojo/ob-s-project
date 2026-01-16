@@ -31,7 +31,8 @@ const About_section = () => {
           data-aos-duration="800"
         >
           <img 
-            src="https://res.cloudinary.com/dhgkmjnvl/image/upload/v1762972416/tote-bags/logo%202.png" 
+            src="https://res.cloudinary.com/dhgkmjnvl/image/upload/v1768605584/tote-bags/footer.jpg     
+" 
             alt="Artisan crafting a tote bag"
             className="rounded-2xl shadow-lg w-full h-auto object-cover"
           />
