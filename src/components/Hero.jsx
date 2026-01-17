@@ -61,21 +61,7 @@ const Hero = () => {
             alt="Artisanal Tote Bag"
             className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-
-          <div className="absolute bottom-8 left-8 right-8 p-6 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 text-white">
-            <p className="font-serif italic text-lg line-clamp-2">"This isn't just a bag; it's a piece of the soul woven into canvas."</p>
-            <div className="mt-4 flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-widest">Handmade in Nigeria</span>
-              <span className="text-[10px] font-black uppercase tracking-widest">Est. 2024</span>
-            </div>
-          </div>
         </div>
-      </div>
-
-      {/* Background Micro-details */}
-      <div className="absolute bottom-10 left-10 opacity-10 pointer-events-none hidden lg:block">
-        <span className="text-9xl font-serif font-black text-gray-900">OB</span>
       </div>
     </section>
   );
