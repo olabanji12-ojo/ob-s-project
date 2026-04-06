@@ -64,9 +64,9 @@ const Footer = () => {
         )}</p>
         <div className="flex justify-center space-x-4 mt-4">
           {/* Replace with actual social media links */}
-          <a href="#" className="hover:text-white">Twitter</a>
-          <a href="#" className="hover:text-white">Instagram</a>
-          <a href="#" className="hover:text-white">LinkedIn</a>
+          <a href="https://x.com/knotsstories?s=21" className="hover:text-white">Twitter</a>
+          <a href="https://x.com/knotsstories?s=21" className="hover:text-white">Instagram</a>
+          <a href="https://www.linkedin.com/company/knotsstories" className="hover:text-white">LinkedIn</a>
         </div>
       </div>
     </footer>

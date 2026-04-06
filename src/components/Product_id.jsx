@@ -183,10 +183,10 @@ const Product_id = () => {
           {/* Details Column */}
           <div className="space-y-10" data-aos="fade-left">
             <div>
-              <div className="flex items-center gap-2 text-[#8B5E3C] mb-4">
+{/* <div className="flex items-center gap-2 text-[#8B5E3C] mb-4">
                 <span className="w-2 h-2 bg-[#8B5E3C] rounded-full"></span>
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Forty Faces of Knots</span>
-              </div>
+              </div> */}
               <h1 className="text-5xl sm:text-6xl font-serif font-black text-gray-900 leading-tight mb-6">
                 {product.name}
               </h1>
@@ -194,10 +194,10 @@ const Product_id = () => {
                 <p className="text-4xl font-bold text-[#8B5E3C]">
                   ₦{product.price?.toLocaleString()}
                 </p>
-                <div className="h-8 w-[1px] bg-gray-200"></div>
+{/* <div className="h-8 w-[1px] bg-gray-200"></div>
                 <div className="flex gap-1 text-[#F4C430]">
                   {[...Array(5)].map((_, i) => <span key={i} className="text-xl">★</span>)}
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -208,7 +208,7 @@ const Product_id = () => {
               </p>
             </div>
 
-            <div className="p-8 bg-[#f7f3f0] rounded-[2rem] space-y-8 relative overflow-hidden group">
+{/* <div className="p-8 bg-[#f7f3f0] rounded-[2rem] space-y-8 relative overflow-hidden group">
               <div className="flex items-start gap-8 relative z-10">
                 <div className="bg-white p-4 rounded-3xl shadow-lg border border-gray-100 transition-transform duration-500 group-hover:rotate-6">
                   <QRCodeSVG
@@ -229,7 +229,7 @@ const Product_id = () => {
                 </div>
               </div>
               <div className="absolute top-0 right-0 w-32 h-32 bg-gray-200/20 -translate-y-12 translate-x-12 rounded-full"></div>
-            </div>
+            </div> */}
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button
@@ -253,7 +253,7 @@ const Product_id = () => {
               </Link>
             </div>
 
-            <div className="pt-8 flex items-center gap-8 border-t border-gray-100">
+{/* <div className="pt-8 flex items-center gap-8 border-t border-gray-100">
               <div className="flex flex-col">
                 <span className="text-[10px] font-black uppercase text-gray-400 tracking-tighter">Availability</span>
                 <span className="font-bold text-gray-900">{product.stock || 0} pieces left</span>
@@ -262,7 +262,7 @@ const Product_id = () => {
                 <span className="text-[10px] font-black uppercase text-gray-400 tracking-tighter">Shipping</span>
                 <span className="font-bold text-gray-900">Crafted 48h</span>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
