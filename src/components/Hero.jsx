@@ -19,7 +19,7 @@ const Hero = () => {
             className="inline-flex items-center gap-2 px-3 py-1 bg-[#8B5E3C]/10 rounded-full mb-6"
           >
             <span className="w-2 h-2 bg-[#8B5E3C] rounded-full"></span>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8B5E3C]">40 FACES</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8B5E3C]">Forty Faces of Knots</span>
           </motion.div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-8xl font-serif font-black text-gray-900 leading-[1.1] mb-8">
@@ -30,8 +30,10 @@ const Hero = () => {
           </h1>
 
           <p className="text-xl text-gray-500 font-light leading-relaxed max-w-xl mb-12">
-            Discover handcrafted tote bags, each woven with care and connected to
-            a unique narrative. Where artisanal quality meets storytelling.
+           An exclusive collection of 1 of 1 totes bags all carry unique characters with unique characters with unique
+           stories that are hardly told, lost behind the faces carrying them. Who we really are, who we rarely are.
+
+           It's art, it's fashion, it's storytelling
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">

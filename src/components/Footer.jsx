@@ -10,8 +10,8 @@ const Footer = () => {
 
         {/* Brand Section */}
         <div className="md:col-span-1">
-          <h3 className="text-xl font-bold font-serif mb-4 text-white">Bomffa Totes</h3>
-          <p className="text-sm">Handcrafted tote bags with a story to tell.</p>
+          <h3 className="text-xl font-bold font-serif mb-4 text-white">Forty Faces of Knots</h3>
+          <p className="text-sm">Handcrafted tote bags, carrying unique characters with unique stories</p>
         </div>
 
         {/* Quick Links */}
@@ -35,7 +35,7 @@ const Footer = () => {
         </div>
 
         {/* Newsletter */}
-        <div>
+        {/* <div>
           <h4 className="font-semibold mb-4 text-white">Join Our Newsletter</h4>
           <p className="text-sm mb-2">Get updates on new arrivals and special offers.</p>
           <form>
@@ -53,18 +53,18 @@ const Footer = () => {
               </button>
             </div>
           </form>
-        </div>
+        </div> */}
 
       </div>
 
       {/* Bottom Bar */}
       <div className="mt-8 pt-8 border-t border-gray-700 text-center text-sm">
-        <p>&copy; {new Date().getFullYear()} Bomffa Totes. All rights reserved. {isAdmin && (
+        <p>&copy; {new Date().getFullYear()} 2026 Bomffa All rights reserved. {isAdmin && (
           <> • <Link to="/admin" className="hover:text-white transition-colors">Admin Dashboard</Link></>
         )}</p>
         <div className="flex justify-center space-x-4 mt-4">
           {/* Replace with actual social media links */}
-          <a href="#" className="hover:text-white">Facebook</a>
+          <a href="#" className="hover:text-white">Twitter</a>
           <a href="#" className="hover:text-white">Instagram</a>
           <a href="#" className="hover:text-white">LinkedIn</a>
         </div>

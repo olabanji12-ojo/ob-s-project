@@ -58,7 +58,7 @@ const Art_components = () => {
             data-aos="fade-up"
             data-aos-delay="100"
           >
-            The <span className="italic text-[#8B5E3C]">Art</span> Gallery
+            Forty <span className="italic text-[#8B5E3C]">Faces</span> of Knots
           </h2>
           <p
             className="text-lg text-gray-500 max-w-2xl mx-auto font-light leading-relaxed"

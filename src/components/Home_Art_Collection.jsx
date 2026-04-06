@@ -78,7 +78,7 @@ const Home_Art_Collection = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="max-w-2xl">
-            <h2 className="text-[10px] uppercase tracking-[0.3em] text-[#8B5E3C] font-black mb-4">The Narrative Gallery</h2>
+            <h2 className="text-[10px] uppercase tracking-[0.3em] text-[#8B5E3C] font-black mb-4">The Faces</h2>
             <h3 className="text-4xl sm:text-5xl font-serif font-bold text-gray-900 leading-tight">
               Stories <span className="italic font-light">Beyond</span> The Canvas
             </h3>

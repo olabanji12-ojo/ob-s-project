@@ -20,7 +20,7 @@ const Admin_dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
     const [uploading, setUploading] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedFiles, setSelectedFiles] = useState([]); // Upgraded: now an array
 
     // Form states
     const [productForm, setProductForm] = useState({
@@ -90,7 +90,7 @@ const Admin_dashboard = () => {
             });
             setActiveTab('stories');
         }
-        setSelectedFile(null);
+        setSelectedFiles([]);
         setIsModalOpen(true);
     };
 
@@ -112,7 +112,7 @@ const Admin_dashboard = () => {
                 productId: ''
             });
         }
-        setSelectedFile(null);
+        setSelectedFiles([]);
         setIsModalOpen(true);
     };
 
@@ -122,12 +122,22 @@ const Admin_dashboard = () => {
         setUploading(true);
 
         try {
-            let finalImageUrl = activeTab === 'products' ? productForm.image[0] : storyForm.image;
+            let finalImageUrls = activeTab === 'products' ? [...productForm.image] : [storyForm.image];
 
-            // Handle file upload if a file is selected
-            if (selectedFile) {
+            // Filter out empty URLs (initial placeholders)
+            finalImageUrls = finalImageUrls.filter(url => url && url.trim() !== '');
+
+            // Handle file upload if files are selected
+            if (selectedFiles.length > 0) {
                 try {
-                    finalImageUrl = await uploadToCloudinary(selectedFile);
+                    const uploadPromises = selectedFiles.map(file => uploadToCloudinary(file));
+                    const newUrls = await Promise.all(uploadPromises);
+                    
+                    if (activeTab === 'products') {
+                        finalImageUrls = [...finalImageUrls, ...newUrls].slice(0, 4); // Limit to 4
+                    } else {
+                        finalImageUrls = [newUrls[0]]; // Stories only have one image
+                    }
                 } catch (uploadError) {
                     alert("Image upload failed: " + uploadError.message);
                     setUploading(false);
@@ -140,7 +150,7 @@ const Admin_dashboard = () => {
                     ...productForm,
                     price: Number(productForm.price),
                     stock: Number(productForm.stock),
-                    image: [finalImageUrl]
+                    image: finalImageUrls
                 };
                 if (editingItem) {
                     await updateDoc(doc(db, 'products', editingItem.id), formData);
@@ -157,14 +167,14 @@ const Admin_dashboard = () => {
                 const storyData = {
                     title: storyForm.title,
                     content: storyForm.content,
-                    image: finalImageUrl
+                    image: finalImageUrls[0] || ''
                 };
 
                 // Use the Product ID as the Story Document ID
                 await setDoc(doc(db, 'stories', storyForm.productId), storyData);
             }
             setIsModalOpen(false);
-            setSelectedFile(null);
+            setSelectedFiles([]);
             fetchData();
         } catch (error) {
             console.error("Error saving document:", error);
@@ -383,24 +393,74 @@ const Admin_dashboard = () => {
                                             ></textarea>
                                         </div>
                                         <div>
-                                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2 block">Upload Product Image</label>
-                                            <div className="flex flex-col gap-3">
+                                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4 block">Product Visuals (Max 4)</label>
+                                            
+                                            {/* Preview Grid */}
+                                            <div className="grid grid-cols-4 gap-4 mb-6">
+                                                {/* Existing/Selected Images */}
+                                                {[...productForm.image.filter(url => url && url.trim() !== ''), ...selectedFiles.map(f => URL.createObjectURL(f))].slice(0, 4).map((img, idx) => (
+                                                    <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 group">
+                                                        <img src={img} alt="" className="w-full h-full object-cover" />
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => {
+                                                                if (idx < productForm.image.filter(url => url && url.trim() !== '').length) {
+                                                                    // Remove existing URL
+                                                                    const newImages = productForm.image.filter((_, i) => i !== idx);
+                                                                    setProductForm({ ...productForm, image: newImages });
+                                                                } else {
+                                                                    // Remove selected file
+                                                                    const fileIdx = idx - productForm.image.filter(url => url && url.trim() !== '').length;
+                                                                    const newFiles = [...selectedFiles];
+                                                                    newFiles.splice(fileIdx, 1);
+                                                                    setSelectedFiles(newFiles);
+                                                                }
+                                                            }}
+                                                            className="absolute inset-0 bg-red-600/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                
+                                                {/* Add Button Placeholder if < 4 */}
+                                                {(productForm.image.filter(url => url && url.trim() !== '').length + selectedFiles.length) < 4 && (
+                                                    <label className="aspect-square rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:border-yellow-500 hover:bg-yellow-50/30 transition-all group">
+                                                        <input
+                                                            type="file"
+                                                            multiple
+                                                            accept="image/*"
+                                                            onChange={(e) => {
+                                                                const files = Array.from(e.target.files);
+                                                                const totalCurrent = productForm.image.filter(url => url && url.trim() !== '').length + selectedFiles.length;
+                                                                const remaining = 4 - totalCurrent;
+                                                                setSelectedFiles([...selectedFiles, ...files.slice(0, remaining)]);
+                                                            }}
+                                                            className="hidden"
+                                                        />
+                                                        <svg className="w-6 h-6 text-gray-300 group-hover:text-yellow-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                                                        <span className="text-[8px] font-black text-gray-400 mt-1 uppercase">Add</span>
+                                                    </label>
+                                                )}
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-bold text-gray-400 whitespace-nowrap">ADD VIA URL</span>
                                                 <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={(e) => setSelectedFile(e.target.files[0])}
-                                                    className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100"
+                                                    type="text"
+                                                    placeholder="Paste Cloudinary URL..."
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            const url = e.target.value.trim();
+                                                            if (url && productForm.image.length < 4) {
+                                                                setProductForm({ ...productForm, image: [...productForm.image, url] });
+                                                                e.target.value = '';
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="flex-1 bg-gray-50 border-0 rounded-2xl px-5 py-3 text-sm text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium"
                                                 />
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-bold text-gray-300 whitespace-nowrap">OR URL</span>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="https://cloudinary.com/..."
-                                                        value={productForm.image[0]}
-                                                        onChange={(e) => setProductForm({ ...productForm, image: [e.target.value] })}
-                                                        className="flex-1 bg-gray-50 border-0 rounded-2xl px-5 py-2 text-sm text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium"
-                                                    />
-                                                </div>
                                             </div>
                                         </div>
                                     </>
@@ -448,7 +508,7 @@ const Admin_dashboard = () => {
                                                 <input
                                                     type="file"
                                                     accept="image/*"
-                                                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                                                    onChange={(e) => setSelectedFiles([e.target.files[0]])}
                                                     className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100"
                                                 />
                                                 <div className="flex items-center gap-2">

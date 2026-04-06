@@ -185,7 +185,7 @@ const Product_id = () => {
             <div>
               <div className="flex items-center gap-2 text-[#8B5E3C] mb-4">
                 <span className="w-2 h-2 bg-[#8B5E3C] rounded-full"></span>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Exquisite Craftsmanship</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Forty Faces of Knots</span>
               </div>
               <h1 className="text-5xl sm:text-6xl font-serif font-black text-gray-900 leading-tight mb-6">
                 {product.name}
@@ -241,7 +241,7 @@ const Product_id = () => {
                   }`}
               >
                 <ShoppingBag className="w-5 h-5" />
-                {product.stock > 0 ? "Add To Collection" : "Sold Out"}
+                {product.stock > 0 ? "Add To Cart" : "Sold Out"}
               </button>
 
               <Link
