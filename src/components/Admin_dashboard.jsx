@@ -643,7 +643,7 @@ const Admin_dashboard = () => {
                 )}
             </div>
         </div>
-    );
+    );   
 };
 
 export default Admin_dashboard;

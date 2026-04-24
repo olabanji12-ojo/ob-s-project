@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { db } from '../firebase/firebase';
-import { doc, setDoc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'; 
+import { doc, setDoc, getDoc, updateDoc, addDoc, collection, serverTimestamp, increment } from 'firebase/firestore'; 
 import { useNavigate, Link } from 'react-router-dom';
 
 
@@ -148,7 +148,7 @@ const Checkout_components = () => {
     }
 
     try {
-      // Step 2: Save user info
+      // Step 2: Save user info to profile
       await setDoc(
         doc(db, 'users', currentUser.uid),
         { ...formData },
@@ -156,88 +156,67 @@ const Checkout_components = () => {
       );
 
       // Step 3: Start Paystack Payment
-      const paystack = new Paystack();
-      paystack.checkout({
+      if (!window.PaystackPop) {
+        alert("Payment system is still loading. Please wait a few seconds and try again.");
+        setLoading(false);
+        return;
+      }
+
+      const handler = window.PaystackPop.setup({
         key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
         email: formData.email,
         amount: (totalPrice + shippingFee) * 100,
         currency: 'NGN',
-
-        onSuccess: async (transaction) => {
+        callback: async (transaction) => {
           try {
-            const res = await fetch(`api/verifyPaystack`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
+            console.log("Payment successful, saving order...", transaction);
+            
+            // 1. Save order to Firestore
+            const orderData = {
+              userId: currentUser.uid,
+              items,
+              totalPrice,
+              shippingFee,
+              grandTotal: totalPrice + shippingFee,
+              formData,
+              transactionReference: transaction.reference,
+              createdAt: serverTimestamp(),
+              status: 'paid'
+            };
+            await addDoc(collection(db, 'orders'), orderData);
+            
+            // 2. Update stock levels
+            await updateProductStock(items);
+
+            // 3. Complete checkout flow
+            clearCart();
+            navigate('/payment-success', {
+              state: {
                 reference: transaction.reference,
-                userId: currentUser?.uid,
-                items: items,
-                formData: formData,
-                totalPrice: totalPrice + shippingFee
-              }),
+                amount: (totalPrice + shippingFee),
+              }
             });
-
-            let data;
-            try {
-              data = await res.json();
-            } catch (err) {
-              console.error('Failed to parse JSON from backend:', await res.text());
-              navigate("/payment-failed");
-              return;
-            }
-
-            console.log("Verification response:", data);
-
-            if (data.verified) {
-              // Save to shipping/orders collection for Admin Dashboard
-              await addDoc(collection(db, 'orders'), {
-                userId: currentUser.uid,
-                formData: formData,
-                items: items,
-                totalPrice: totalPrice,
-                shippingFee: shippingFee,
-                grandTotal: totalPrice + shippingFee,
-                createdAt: serverTimestamp(),
-                status: 'paid'
-              });
-
-              // Reduce stock
-              await updateProductStock(items);
-
-              clearCart();
-              navigate("/payment-success", {
-                state: {
-                  reference: transaction.reference,
-                  amount: (totalPrice + shippingFee) * 100,
-                  status: transaction.status || 'success'
-                }
-              });
-            } else {
-              navigate("/payment-failed");
-            }
-          } catch (err) {
-            console.error("Payment verification failed:", err);
-            navigate("/payment-failed");
+            alert('Payment successful! Your order has been placed.');
+          } catch (orderErr) {
+            console.error("Order processing error:", orderErr);
+            alert("Payment successful but we encountered an error saving your order. Please contact support.");
+          } finally {
+            setLoading(false);
           }
         },
-
-        onCancel: () => {
-          navigate('/payment-failed', { state: { reason: 'User canceled payment' } });
-        },
-
-        onError: (error) => {
-          console.error('Payment error:', error);
-          navigate('/payment-failed', {
-            state: { reason: 'Payment error', details: error.message },
-          });
+        onClose: () => {
+          setLoading(false);
+          alert('Transaction was not completed.');
         },
       });
+
+      handler.openIframe();
+
     } catch (err) {
       console.error('Checkout error:', err);
-      setError('Failed to process checkout. Please try again.');
+      setError('An error occurred. Please try again.');
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
 
