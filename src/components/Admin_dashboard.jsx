@@ -318,6 +318,22 @@ const Admin_dashboard = () => {
                                                                 </div>
                                                             ))}
                                                         </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">Order Summary</p>
+                                                        <div className="space-y-2 bg-white p-4 rounded-xl border border-gray-100">
+                                                            <div className="flex justify-between text-xs">
+                                                                <span className="text-gray-400">Subtotal:</span>
+                                                                <span className="font-bold">₦{order.totalPrice?.toLocaleString()}</span>
+                                                            </div>
+                                                            <div className="flex justify-between text-xs">
+                                                                <span className="text-gray-400">Shipping:</span>
+                                                                <span className="font-bold">₦{order.shippingFee?.toLocaleString() || 0}</span>
+                                                            </div>
+                                                            <div className="pt-2 border-t flex justify-between text-sm">
+                                                                <span className="font-black text-gray-900 uppercase tracking-tighter">Total Paid:</span>
+                                                                <span className="font-black text-[#8B5E3C]">₦{(order.grandTotal || order.totalPrice)?.toLocaleString()}</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
