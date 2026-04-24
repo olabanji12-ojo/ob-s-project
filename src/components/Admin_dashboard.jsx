@@ -9,10 +9,13 @@ import {
     doc,
     setDoc
 } from 'firebase/firestore';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { uploadToCloudinary } from '../utils/cloudinaryConfig';
+import { useAuth } from '../context/AuthContext';
 
 const Admin_dashboard = () => {
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('products');
     const [products, setProducts] = useState([]);
     const [stories, setStories] = useState([]);
@@ -40,8 +43,12 @@ const Admin_dashboard = () => {
     });
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (currentUser) {
+            fetchData();
+        } else {
+            setLoading(false);
+        }
+    }, [currentUser]);
 
     const fetchData = async () => {
         setLoading(true);
