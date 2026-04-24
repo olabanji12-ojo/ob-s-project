@@ -152,12 +152,27 @@ const Checkout_components = () => {
     }
 
     try {
-      // Step 2: Save user info to profile
+      // Step 2: Save user info to profile explicitly
+      const userProfileData = {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipcode: formData.zipcode,
+        lastUpdated: serverTimestamp()
+      };
+      
+      console.log("Saving Shipping Details to Profile:", userProfileData);
+      
       await setDoc(
         doc(db, 'users', currentUser.uid),
-        { ...formData },
+        userProfileData,
         { merge: true }
       );
+      
+      console.log("Profile updated successfully");
 
       // Step 3: Start Paystack Payment
       if (!window.PaystackPop) {
