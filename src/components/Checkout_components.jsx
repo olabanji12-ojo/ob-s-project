@@ -102,22 +102,23 @@ const Checkout_components = () => {
     }
   }, [currentUser]);
 
+  // Sync shipping fee whenever city changes (including on profile load)
+  useEffect(() => {
+    if (formData.city === 'Lagos') {
+      setShippingFee(2500);
+    } else if (formData.city === 'Ibadan') {
+      setShippingFee(3500);
+    } else {
+      setShippingFee(0);
+    }
+  }, [formData.city]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     
     if (name === 'city') {
-      let fee = 0;
-      let state = 'Oyo'; // Default as majority are outside Lagos but in Southwest
-      
-      if (value === 'Lagos') {
-        fee = 2500;
-        state = 'Lagos';
-      } else if (value === 'Ibadan') {
-        fee = 3500;
-        state = 'Oyo';
-      }
-      
-      setShippingFee(fee);
+      let state = 'Oyo'; 
+      if (value === 'Lagos') state = 'Lagos';
       setFormData(prev => ({ ...prev, city: value, state: state }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
