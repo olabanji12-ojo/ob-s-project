@@ -167,42 +167,47 @@ const Checkout_components = () => {
         email: formData.email,
         amount: (totalPrice + shippingFee) * 100,
         currency: 'NGN',
-        callback: async (transaction) => {
-          try {
-            console.log("Payment successful, saving order...", transaction);
-            
-            // 1. Save order to Firestore
-            const orderData = {
-              userId: currentUser.uid,
-              items,
-              totalPrice,
-              shippingFee,
-              grandTotal: totalPrice + shippingFee,
-              formData,
-              transactionReference: transaction.reference,
-              createdAt: serverTimestamp(),
-              status: 'paid'
-            };
-            await addDoc(collection(db, 'orders'), orderData);
-            
-            // 2. Update stock levels
-            await updateProductStock(items);
+        callback: (transaction) => {
+          // Handle the successful transaction in a separate async block
+          const completeOrder = async () => {
+            try {
+              console.log("Payment successful, saving order...", transaction);
+              
+              // 1. Save order to Firestore
+              const orderData = {
+                userId: currentUser.uid,
+                items,
+                totalPrice,
+                shippingFee,
+                grandTotal: totalPrice + shippingFee,
+                formData,
+                transactionReference: transaction.reference,
+                createdAt: serverTimestamp(),
+                status: 'paid'
+              };
+              await addDoc(collection(db, 'orders'), orderData);
+              
+              // 2. Update stock levels
+              await updateProductStock(items);
 
-            // 3. Complete checkout flow
-            clearCart();
-            navigate('/payment-success', {
-              state: {
-                reference: transaction.reference,
-                amount: (totalPrice + shippingFee),
-              }
-            });
-            alert('Payment successful! Your order has been placed.');
-          } catch (orderErr) {
-            console.error("Order processing error:", orderErr);
-            alert("Payment successful but we encountered an error saving your order. Please contact support.");
-          } finally {
-            setLoading(false);
-          }
+              // 3. Complete checkout flow
+              clearCart();
+              navigate('/payment-success', {
+                state: {
+                  reference: transaction.reference,
+                  amount: (totalPrice + shippingFee),
+                }
+              });
+              alert('Payment successful! Your order has been placed.');
+            } catch (orderErr) {
+              console.error("Order processing error:", orderErr);
+              alert("Payment successful but we encountered an error saving your order. Please contact support.");
+            } finally {
+              setLoading(false);
+            }
+          };
+          
+          completeOrder();
         },
         onClose: () => {
           setLoading(false);
