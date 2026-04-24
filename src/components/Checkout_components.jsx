@@ -29,7 +29,9 @@ const Checkout_components = () => {
     const outOfStockItems = [];
 
     for (const item of cartItems) {
-      const productRef = doc(db, "products", item.productId);  // ✅ Use productId
+      const pId = item.id || item.productId;
+      if (!pId) continue;
+      const productRef = doc(db, "products", pId);
       const productSnap = await getDoc(productRef);
 
       if (!productSnap.exists()) {
@@ -53,14 +55,16 @@ const Checkout_components = () => {
   };
 
 
-  // ✅ Update product stock after successful payment
   const updateProductStock = async (cartItems) => {
     for (const item of cartItems) {
-      const productRef = doc(db, "products", item.productId);  // ✅ Use productId
+      const pId = item.id || item.productId;
+      if (!pId) continue;
+      
+      const productRef = doc(db, "products", pId);
       const productSnap = await getDoc(productRef);
       if (productSnap.exists()) {
         const productData = productSnap.data();
-        const newStock = productData.stock - item.quantity;
+        const newStock = (productData.stock || 0) - (item.quantity || 0);
         await updateDoc(productRef, { stock: Math.max(newStock, 0) });
       }
     }
@@ -173,35 +177,52 @@ const Checkout_components = () => {
             try {
               console.log("Payment successful, saving order...", transaction);
               
-              // 1. Save order to Firestore
+              const safeTransactionRef = transaction.reference || transaction.trxref || "N/A";
+
+              // 1. Save order to Firestore FIRST (Most Important)
               const orderData = {
-                userId: currentUser.uid,
-                items,
-                totalPrice,
-                shippingFee,
-                grandTotal: totalPrice + shippingFee,
-                formData,
-                transactionReference: transaction.reference,
+                userId: currentUser.uid || "Guest",
+                items: items.map(it => ({
+                  id: it.id || it.productId || "unknown",
+                  name: it.name || "Unknown Product",
+                  price: it.price || 0,
+                  quantity: it.quantity || 1
+                })),
+                totalPrice: totalPrice || 0,
+                shippingFee: shippingFee || 0,
+                grandTotal: (totalPrice || 0) + (shippingFee || 0),
+                formData: {
+                  ...formData,
+                  fullName: formData.fullName || "Unnamed Customer",
+                  email: formData.email || transaction.customer?.email || "No Email"
+                },
+                transactionReference: safeTransactionRef,
                 createdAt: serverTimestamp(),
                 status: 'paid'
               };
-              await addDoc(collection(db, 'orders'), orderData);
               
-              // 2. Update stock levels
-              await updateProductStock(items);
+              await addDoc(collection(db, 'orders'), orderData);
+              console.log("Order saved successfully to DB");
+              
+              // 2. Update stock levels (Optional but good)
+              try {
+                await updateProductStock(items);
+              } catch (stockErr) {
+                console.error("Stock update failed, but order was saved:", stockErr);
+              }
 
               // 3. Complete checkout flow
               clearCart();
               navigate('/payment-success', {
                 state: {
-                  reference: transaction.reference,
+                  reference: safeTransactionRef,
                   amount: (totalPrice + shippingFee),
                 }
               });
               alert('Payment successful! Your order has been placed.');
             } catch (orderErr) {
-              console.error("Order processing error:", orderErr);
-              alert("Payment successful but we encountered an error saving your order. Please contact support.");
+              console.error("CRITICAL: Order saving failed!", orderErr);
+              alert("Payment successful but we encountered a critical error saving your order. Please take a screenshot of your payment reference and contact us!");
             } finally {
               setLoading(false);
             }
