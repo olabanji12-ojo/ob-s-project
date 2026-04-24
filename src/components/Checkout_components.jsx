@@ -102,12 +102,13 @@ const Checkout_components = () => {
     }
   }, [currentUser]);
 
-  // Sync shipping fee whenever city changes (including on profile load)
   useEffect(() => {
     if (formData.city === 'Lagos') {
       setShippingFee(2500);
     } else if (formData.city === 'Ibadan') {
       setShippingFee(3500);
+    } else if (formData.city === 'Outside') {
+      setShippingFee(0); // Pay on Delivery
     } else {
       setShippingFee(0);
     }
@@ -119,6 +120,7 @@ const Checkout_components = () => {
     if (name === 'city') {
       let state = 'Oyo'; 
       if (value === 'Lagos') state = 'Lagos';
+      if (value === 'Outside') state = 'Other State';
       setFormData(prev => ({ ...prev, city: value, state: state }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -314,6 +316,7 @@ const Checkout_components = () => {
                   <option value="">Select your city...</option>
                   <option value="Lagos">Lagos (₦2,500)</option>
                   <option value="Ibadan">Ibadan (₦3,500)</option>
+                  <option value="Outside">Outside Lagos/Ibadan (Pay on Delivery)</option>
                 </select>
               </div>
               <div>
@@ -444,8 +447,18 @@ const Checkout_components = () => {
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Shipping</span>
-                <span>{shippingFee > 0 ? `₦${shippingFee.toLocaleString()}` : "Select city"}</span>
+                <span>
+                  {formData.city === 'Outside' 
+                    ? "Pay on Delivery" 
+                    : (shippingFee > 0 ? `₦${shippingFee.toLocaleString()}` : "Select city")
+                  }
+                </span>
               </div>
+              {formData.city === 'Outside' && (
+                <p className="text-[10px] text-right text-gray-400 italic">
+                  Note: You only pay for products now. Shipping fee is paid to the courier at delivery.
+                </p>
+              )}
               <div className="h-px bg-gray-100 my-4"></div>
               <div className="flex justify-between text-xl font-black text-gray-900 border-t pt-4">
                 <span>Total</span>
