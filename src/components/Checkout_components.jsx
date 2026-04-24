@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext'; // Added import
+import { useCart } from '../context/CartContext';
 import { db } from '../firebase/firebase';
-import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';  // ✅ Add updateDoc
-import { useNavigate } from 'react-router-dom';
-import Paystack from '@paystack/inline-js';
+import { doc, setDoc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'; 
 
 
 const Checkout_components = () => {
@@ -169,6 +167,20 @@ const Checkout_components = () => {
             console.log("Verification response:", data);
 
             if (data.verified) {
+              // Save to shipping/orders collection for Admin Dashboard
+              await addDoc(collection(db, 'orders'), {
+                userId: currentUser.uid,
+                formData: formData,
+                items: items,
+                totalPrice: totalPrice,
+                reference: transaction.reference,
+                createdAt: serverTimestamp(),
+                status: 'paid'
+              });
+
+              // Reduce stock
+              await updateProductStock(items);
+
               clearCart();
               navigate("/payment-success", {
                 state: {

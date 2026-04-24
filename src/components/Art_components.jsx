@@ -49,7 +49,7 @@ const Art_components = () => {
     <section
       className="py-20 px-4 sm:px-6 lg:px-8 bg-[#FDFCFB]"
       data-aos="fade-in"
-      data-aos-duration="1000"
+      data-aos-duration="400"
     >
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">

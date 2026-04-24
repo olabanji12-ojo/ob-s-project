@@ -11,7 +11,7 @@ const Hero = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 grid lg:grid-cols-2 gap-12 items-center">
 
         {/* Left Content: Narrative */}
-        <div data-aos="fade-right" data-aos-duration="1200">
+        <div data-aos="fade-right" data-aos-duration="400">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -21,19 +21,16 @@ const Hero = () => {
             <span className="w-2 h-2 bg-[#8B5E3C] rounded-full"></span>
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8B5E3C]">Forty Faces of Knots</span>
           </motion.div>
-
-          <h1 className="text-5xl sm:text-6xl lg:text-8xl font-serif font-black text-gray-900 leading-[1.1] mb-8">
+          
+          <h1 className="text-5xl sm:text-6xl lg:text-8xl font-serif font-black text-gray-900 leading-[1.1] mb-12">
             Every Bag <br />
             <span className="italic text-[#8B5E3C] relative shadow-accent">
               Tells
             </span> A Story
           </h1>
 
-          <p className="text-xl text-gray-500 font-light leading-relaxed max-w-xl mb-12">
-           An exclusive collection of 1 of 1 totes bags all carry unique characters with unique characters with unique
-           stories that are hardly told, lost behind the faces carrying them. Who we really are, who we rarely are.
-
-           It's art, it's fashion, it's storytelling
+          <p className="text-lg text-gray-500 font-light leading-relaxed max-w-xl mb-12">
+            The Forty faces of Knots tote bag Collection is an original concept and design by Knots’ stories. Each piece is thoughtfully constructed with every stitch, form, and variation representing a distinct expression within the collection’s narrative; a one of one character, story and tote bag collectible.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -56,7 +53,7 @@ const Hero = () => {
         <div
           className="relative aspect-[4/5] lg:aspect-auto lg:h-[70vh] rounded-[3rem] overflow-hidden shadow-2xl group"
           data-aos="fade-left"
-          data-aos-duration="1200"
+          data-aos-duration="400"
         >
           <img
             src="https://res.cloudinary.com/dhgkmjnvl/image/upload/v1768606093/tote-bags/hero_image2.jpg"

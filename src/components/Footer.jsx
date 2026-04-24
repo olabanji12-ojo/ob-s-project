@@ -11,7 +11,7 @@ const Footer = () => {
         {/* Brand Section */}
         <div className="md:col-span-1">
           <h3 className="text-xl font-bold font-serif mb-4 text-white">Forty Faces of Knots</h3>
-          <p className="text-sm">Handcrafted tote bags, carrying unique characters with unique stories</p>
+          <p className="text-sm">The Forty faces of Knots tote bag Collection is an original concept and design by Knots’ stories. Each piece is thoughtfully constructed with every stitch, form, and variation representing a distinct expression within the collection’s narrative; a one of one character, story and tote bag collectible.</p>
         </div>
 
         {/* Quick Links */}
@@ -29,8 +29,6 @@ const Footer = () => {
           <h4 className="font-semibold mb-4 text-white">Customer Service</h4>
           <ul className="space-y-2 text-sm">
             <li><Link to="/contact" className="hover:text-white">Contact Us</Link></li>
-            <li><Link to="/faq" className="hover:text-white">FAQ</Link></li>
-            <li><Link to="/shipping" className="hover:text-white">Shipping & Returns</Link></li>
           </ul>
         </div>
 

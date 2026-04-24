@@ -16,6 +16,7 @@ const Admin_dashboard = () => {
     const [activeTab, setActiveTab] = useState('products');
     const [products, setProducts] = useState([]);
     const [stories, setStories] = useState([]);
+    const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
@@ -52,6 +53,10 @@ const Admin_dashboard = () => {
             const storiesSnapshot = await getDocs(collection(db, 'stories'));
             const storiesList = storiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setStories(storiesList);
+
+            const ordersSnapshot = await getDocs(collection(db, 'orders'));
+            const ordersList = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setOrders(ordersList);
         } catch (error) {
             console.error("Error fetching data:", error);
         } finally {
@@ -255,6 +260,13 @@ const Admin_dashboard = () => {
                         >
                             STORIES & ART
                         </button>
+                        <button
+                            onClick={() => setActiveTab('shipping')}
+                            className={`flex-1 py-5 text-sm font-bold transition-all ${activeTab === 'shipping' ? 'text-gray-900 bg-white border-b-2 border-yellow-500' : 'text-gray-400 hover:text-gray-600'
+                                }`}
+                        >
+                            SHIPPING
+                        </button>
                         <button className="flex-1 py-5 text-sm font-bold text-gray-300 cursor-not-allowed">
                             ANALYTICS <span className="text-[10px] ml-1 opacity-50">(SOON)</span>
                         </button>
@@ -268,7 +280,57 @@ const Admin_dashboard = () => {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {(activeTab === 'products' ? products : stories).map((item) => (
+                                {activeTab === 'shipping' && (
+                                    <div className="grid grid-cols-1 gap-6">
+                                        {orders.map((order) => (
+                                            <div
+                                                key={order.id}
+                                                className="p-8 rounded-[2rem] bg-gray-50 border border-transparent hover:border-gray-200 transition-all space-y-6"
+                                            >
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Customer Details</p>
+                                                        <h3 className="text-xl font-bold text-gray-900">{order.formData?.fullName}</h3>
+                                                        <p className="text-sm text-gray-500">{order.formData?.email} • {order.formData?.phone}</p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Order Status</p>
+                                                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Paid</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid md:grid-cols-2 gap-8 pt-6 border-t border-gray-200">
+                                                    <div>
+                                                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">Shipping Address</p>
+                                                        <p className="text-gray-700 leading-relaxed font-medium">
+                                                            {order.formData?.address}<br />
+                                                            {order.formData?.city}, {order.formData?.state}<br />
+                                                            {order.formData?.zipcode}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">Items Purchased</p>
+                                                        <div className="space-y-3">
+                                                            {order.items?.map((item, idx) => (
+                                                                <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-xl border border-gray-100">
+                                                                    <span className="text-sm font-bold text-gray-900 truncate mr-4">{item.name}</span>
+                                                                    <span className="text-xs font-black text-[#8B5E3C]">x{item.quantity}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {orders.length === 0 && (
+                                            <div className="text-center py-24 opacity-50">
+                                                <p className="text-xl font-medium italic font-serif">No shipments pending.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {(activeTab === 'products' || activeTab === 'stories') && (activeTab === 'products' ? products : stories).map((item) => (
                                     <div
                                         key={item.id}
                                         className="p-4 rounded-2xl bg-gray-50 hover:bg-white border border-transparent hover:border-gray-100 hover:shadow-lg transition-all flex flex-col sm:flex-row items-center gap-6"
@@ -326,15 +388,15 @@ const Admin_dashboard = () => {
                 {isModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
                         <div
-                            className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden"
+                            className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
                             data-aos="zoom-in"
                         >
-                            <div className="bg-gray-900 px-8 py-10 text-white flex justify-between items-center">
+                            <div className="bg-gray-900 px-8 py-6 text-white flex justify-between items-center shrink-0">
                                 <div>
-                                    <h2 className="text-2xl font-serif font-black">
+                                    <h2 className="text-xl font-serif font-black">
                                         {editingItem ? 'Edit' : 'Create'} <span className="text-yellow-500 uppercase">{activeTab.slice(0, -1)}</span>
                                     </h2>
-                                    <p className="text-gray-400 text-xs mt-1 uppercase tracking-widest font-bold">Details & Meta Information</p>
+                                    <p className="text-gray-400 text-[10px] uppercase tracking-widest font-bold">Details & Meta Information</p>
                                 </div>
                                 <button
                                     onClick={() => setIsModalOpen(false)}
@@ -344,7 +406,7 @@ const Admin_dashboard = () => {
                                 </button>
                             </div>
 
-                            <form onSubmit={handleSubmit} className="px-8 py-10 space-y-6">
+                            <form onSubmit={handleSubmit} className="px-8 py-8 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
                                 {activeTab === 'products' ? (
                                     <>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -526,7 +588,7 @@ const Admin_dashboard = () => {
                                     </>
                                 )}
 
-                                <div className="flex gap-4 pt-4">
+                                <div className="flex gap-4 pt-2 pb-6">
                                     <button
                                         type="button"
                                         onClick={() => setIsModalOpen(false)}

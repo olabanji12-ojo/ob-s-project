@@ -234,14 +234,14 @@ const Product_id = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={handleAddToCart}
-                disabled={!product.stock || product.stock < 1}
+                disabled={!product.stock || product.stock === 0 || product.stock === '0'}
                 className={`flex-[2] py-6 px-10 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-500 shadow-2xl active:scale-95 ${product.stock > 0
                   ? "bg-gray-900 text-white hover:bg-[#8B5E3C] shadow-gray-900/20"
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"
                   }`}
               >
                 <ShoppingBag className="w-5 h-5" />
-                {product.stock > 0 ? "Add To Cart" : "Sold Out"}
+                {(product.stock > 0 && product.stock !== '0') ? "Add To Cart" : "Sold"}
               </button>
 
               <Link

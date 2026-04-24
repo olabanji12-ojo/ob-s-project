@@ -41,14 +41,14 @@ const Featured_collection = () => {
     <section
       className="w-full py-12 px-4 sm:px-6 lg:px-8"
       data-aos="fade-in"
-      data-aos-duration="800"
+      data-aos-duration="400"
     >
       <div className="text-center mb-10">
         <h2
           className="text-3xl sm:text-4xl font-serif font-bold text-gray-800 mb-2"
           data-aos="fade-up"
           data-aos-delay="100"
-          data-aos-duration="800"
+          data-aos-duration="400"
         >
           View Collectibles
         </h2>
@@ -56,7 +56,7 @@ const Featured_collection = () => {
           className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto"
           data-aos="fade-up"
           data-aos-delay="200"
-          data-aos-duration="800"
+          data-aos-duration="400"
         >
           Each tote is carefully crafted by skilled artisans and comes with its own story.
         </p>
@@ -74,14 +74,23 @@ const Featured_collection = () => {
               className="bg-white p-4 rounded-lg shadow-md text-center hover:shadow-xl hover:scale-105 transition-transform duration-300 ease-in-out"
               data-aos="fade-up"
               data-aos-delay={300 + index * 100}
-              data-aos-duration="800"
+              data-aos-duration="400"
             >
-              <img
-                src={item.image && item.image.length > 0 ? item.image[0] : "/placeholder.jpg"}
-                alt={item.name}
-                className="w-full h-64 object-cover rounded-md mb-4"
-                onError={(e) => (e.target.src = "/placeholder.jpg")}
-              />
+              <div className="relative aspect-square overflow-hidden rounded-md mb-4 bg-gray-50">
+                <img
+                  src={item.image && item.image.length > 0 ? item.image[0] : "/placeholder.jpg"}
+                  alt={item.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => (e.target.src = "/placeholder.jpg")}
+                />
+                {(!item.stock || item.stock === 0 || item.stock === '0') && (
+                  <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] flex items-center justify-center">
+                    <span className="bg-white/90 text-gray-900 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-xl">
+                      Sold
+                    </span>
+                  </div>
+                )}
+              </div>
               <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
               <p className="text-yellow-600 font-bold mt-2">
                 ₦{item.price?.toLocaleString()}
@@ -92,7 +101,7 @@ const Featured_collection = () => {
                   {item.stock} left in stock
                 </p>
               ) : (
-                <p className="text-sm text-red-500 font-medium mt-1">Out of stock</p>
+                <p className="text-sm text-red-500 font-medium mt-1">Sold</p>
               )}
 
               <Link
@@ -113,7 +122,7 @@ const Featured_collection = () => {
         className="text-center mt-8"
         data-aos="zoom-in"
         data-aos-delay="600"
-        data-aos-duration="800"
+        data-aos-duration="400"
       >
         <Link
           to="/products"
