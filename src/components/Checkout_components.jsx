@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { db } from '../firebase/firebase';
 import { doc, setDoc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'; 
+import { useNavigate } from 'react-router-dom';
 
 
 const Checkout_components = () => {
