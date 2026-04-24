@@ -3,13 +3,14 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { db } from '../firebase/firebase';
 import { doc, setDoc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'; 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 
 const Checkout_components = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const { items, totalPrice, clearCart } = useCart();
+  const [shippingFee, setShippingFee] = useState(0);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -103,7 +104,24 @@ const Checkout_components = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    if (name === 'city') {
+      let fee = 0;
+      let state = 'Oyo'; // Default as majority are outside Lagos but in Southwest
+      
+      if (value === 'Lagos') {
+        fee = 2500;
+        state = 'Lagos';
+      } else if (value === 'Ibadan') {
+        fee = 3500;
+        state = 'Oyo';
+      }
+      
+      setShippingFee(fee);
+      setFormData(prev => ({ ...prev, city: value, state: state }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   // ✅ Main checkout logic
@@ -139,7 +157,7 @@ const Checkout_components = () => {
       paystack.checkout({
         key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
         email: formData.email,
-        amount: totalPrice * 100,
+        amount: (totalPrice + shippingFee) * 100,
         currency: 'NGN',
 
         onSuccess: async (transaction) => {
@@ -152,7 +170,7 @@ const Checkout_components = () => {
                 userId: currentUser?.uid,
                 items: items,
                 formData: formData,
-                totalPrice: totalPrice
+                totalPrice: totalPrice + shippingFee
               }),
             });
 
@@ -174,7 +192,8 @@ const Checkout_components = () => {
                 formData: formData,
                 items: items,
                 totalPrice: totalPrice,
-                reference: transaction.reference,
+                shippingFee: shippingFee,
+                grandTotal: totalPrice + shippingFee,
                 createdAt: serverTimestamp(),
                 status: 'paid'
               });
@@ -186,7 +205,7 @@ const Checkout_components = () => {
               navigate("/payment-success", {
                 state: {
                   reference: transaction.reference,
-                  amount: totalPrice * 100,
+                  amount: (totalPrice + shippingFee) * 100,
                   status: transaction.status || 'success'
                 }
               });
@@ -259,7 +278,59 @@ const Checkout_components = () => {
           >
             Customer & Shipping Details
           </h3>
+
+          {/* Disclaimer Box */}
+          <div className="mb-8 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg" data-aos="fade-up">
+            <div className="flex gap-3">
+              <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider mb-1">Shipping Disclaimer</p>
+                <p className="text-sm font-medium leading-relaxed">
+                  We currently offer direct shipping selection for <span className="font-bold">Lagos</span> and <span className="font-bold">Ibadan</span> only. 
+                </p>
+                <p className="text-xs mt-2 opacity-80">
+                  Staying elsewhere? <Link to="/contact" className="underline font-bold hover:text-yellow-900">Contact us for a special delivery quote</Link>.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <form id="checkout-form" onSubmit={handleSubmit}>
+            {/* City Selection First */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" data-aos="fade-right">
+              <div>
+                <label htmlFor="city" className="block text-sm font-black uppercase text-gray-400 tracking-widest mb-2">
+                  Delivery City
+                </label>
+                <select
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium appearance-none"
+                  required
+                >
+                  <option value="">Select your city...</option>
+                  <option value="Lagos">Lagos (₦2,500)</option>
+                  <option value="Ibadan">Ibadan (₦3,500)</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="state" className="block text-sm font-black uppercase text-gray-400 tracking-widest mb-2">
+                  State
+                </label>
+                <input
+                  type="text"
+                  id="state"
+                  name="state"
+                  value={formData.state}
+                  readOnly
+                  className="w-full bg-gray-100 border-0 rounded-2xl px-5 py-4 text-gray-500 font-medium cursor-not-allowed"
+                  placeholder="Computed from City"
+                />
+              </div>
+            </div>
+
             <div
               className="mb-4"
               data-aos="fade-right"
@@ -340,43 +411,6 @@ const Checkout_components = () => {
               />
             </div>
             <div
-              className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"
-              data-aos="fade-right"
-              data-aos-delay="600"
-              data-aos-duration="800"
-            >
-              <div>
-                <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                  City
-                </label>
-                <input
-                  type="text"
-                  id="city"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 focus:outline-none focus:border-[#F4C430] transition-colors"
-                  placeholder="City"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="state" className="block text-sm font-medium text-gray-700">
-                  State
-                </label>
-                <input
-                  type="text"
-                  id="state"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 focus:outline-none focus:border-[#F4C430] transition-colors"
-                  placeholder="State"
-                  required
-                />
-              </div>
-            </div>
-            <div
               className="mb-4"
               data-aos="fade-right"
               data-aos-delay="650"
@@ -402,17 +436,30 @@ const Checkout_components = () => {
               data-aos-delay="700"
               data-aos-duration="800"
             >
-              <p className="text-lg font-semibold">
-                Total: <span className="text-[#8B5E3C]">₦{totalPrice.toLocaleString()}</span>
-              </p>
-              <button
-                type="submit"
-                id="place-order-btn"
-                disabled={loading}
-                className={`mt-4 w-full bg-[#8B5E3C] text-white py-2 px-4 rounded-md hover:bg-[#6B4423] transition duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {loading ? 'Processing...' : 'Proceed to Payment'}
-              </button>
+            <div className="space-y-2 mb-6">
+              <div className="flex justify-between text-gray-600">
+                <span>Subtotal</span>
+                <span>₦{totalPrice.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>Shipping</span>
+                <span>{shippingFee > 0 ? `₦${shippingFee.toLocaleString()}` : "Select city"}</span>
+              </div>
+              <div className="h-px bg-gray-100 my-4"></div>
+              <div className="flex justify-between text-xl font-black text-gray-900 border-t pt-4">
+                <span>Total</span>
+                <span className="text-[#8B5E3C]">₦{(totalPrice + shippingFee).toLocaleString()}</span>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              id="place-order-btn"
+              disabled={loading || shippingFee === 0}
+              className={`w-full bg-gray-900 text-white py-5 px-4 rounded-2xl font-black uppercase tracking-widest hover:bg-[#8B5E3C] transition duration-300 shadow-xl ${loading || shippingFee === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {loading ? 'Processing...' : 'Proceed to Payment'}
+            </button>
             </div>
           </form>
         </div>
