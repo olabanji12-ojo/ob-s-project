@@ -183,7 +183,7 @@ const Cart_components = () => {
                 data-aos-duration="800"
               >
                 <span className="text-gray-600">Shipping</span>
-                <span className="text-[#3E3E3E] font-semibold">Free</span>
+                <span className="text-[#3E3E3E] font-medium text-xs italic">Calculated at Checkout</span>
               </div>
 
               {/* Divider */}
