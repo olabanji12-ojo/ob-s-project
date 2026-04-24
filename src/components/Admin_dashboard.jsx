@@ -21,7 +21,7 @@ const Admin_dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
     const [uploading, setUploading] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useState([]); // Upgraded: now an array
+    const [selectedFiles, setSelectedFiles] = useState([]);
 
     // Form states
     const [productForm, setProductForm] = useState({
@@ -36,7 +36,7 @@ const Admin_dashboard = () => {
         title: '',
         content: '',
         image: '',
-        productId: '' // Link to a product
+        productId: ''
     });
 
     useEffect(() => {
@@ -123,25 +123,21 @@ const Admin_dashboard = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const collectionName = activeTab;
         setUploading(true);
 
         try {
             let finalImageUrls = activeTab === 'products' ? [...productForm.image] : [storyForm.image];
-
-            // Filter out empty URLs (initial placeholders)
             finalImageUrls = finalImageUrls.filter(url => url && url.trim() !== '');
 
-            // Handle file upload if files are selected
             if (selectedFiles.length > 0) {
                 try {
                     const uploadPromises = selectedFiles.map(file => uploadToCloudinary(file));
                     const newUrls = await Promise.all(uploadPromises);
                     
                     if (activeTab === 'products') {
-                        finalImageUrls = [...finalImageUrls, ...newUrls].slice(0, 4); // Limit to 4
+                        finalImageUrls = [...finalImageUrls, ...newUrls].slice(0, 4);
                     } else {
-                        finalImageUrls = [newUrls[0]]; // Stories only have one image
+                        finalImageUrls = [newUrls[0]];
                     }
                 } catch (uploadError) {
                     alert("Image upload failed: " + uploadError.message);
@@ -163,7 +159,6 @@ const Admin_dashboard = () => {
                     await addDoc(collection(db, 'products'), formData);
                 }
             } else {
-                // Story logic
                 if (!storyForm.productId) {
                     alert("Please select a product for this story.");
                     setUploading(false);
@@ -174,8 +169,6 @@ const Admin_dashboard = () => {
                     content: storyForm.content,
                     image: finalImageUrls[0] || ''
                 };
-
-                // Use the Product ID as the Story Document ID
                 await setDoc(doc(db, 'stories', storyForm.productId), storyData);
             }
             setIsModalOpen(false);
@@ -248,22 +241,19 @@ const Admin_dashboard = () => {
                     <div className="flex border-b border-gray-100 bg-gray-50/50">
                         <button
                             onClick={() => setActiveTab('products')}
-                            className={`flex-1 py-5 text-sm font-bold transition-all ${activeTab === 'products' ? 'text-gray-900 bg-white border-b-2 border-yellow-500' : 'text-gray-400 hover:text-gray-600'
-                                }`}
+                            className={`flex-1 py-5 text-sm font-bold transition-all ${activeTab === 'products' ? 'text-gray-900 bg-white border-b-2 border-yellow-500' : 'text-gray-400 hover:text-gray-600'}`}
                         >
                             PRODUCTS
                         </button>
                         <button
                             onClick={() => setActiveTab('stories')}
-                            className={`flex-1 py-5 text-sm font-bold transition-all ${activeTab === 'stories' ? 'text-gray-900 bg-white border-b-2 border-yellow-500' : 'text-gray-400 hover:text-gray-600'
-                                }`}
+                            className={`flex-1 py-5 text-sm font-bold transition-all ${activeTab === 'stories' ? 'text-gray-900 bg-white border-b-2 border-yellow-500' : 'text-gray-400 hover:text-gray-600'}`}
                         >
                             STORIES & ART
                         </button>
                         <button
                             onClick={() => setActiveTab('shipping')}
-                            className={`flex-1 py-5 text-sm font-bold transition-all ${activeTab === 'shipping' ? 'text-gray-900 bg-white border-b-2 border-yellow-500' : 'text-gray-400 hover:text-gray-600'
-                                }`}
+                            className={`flex-1 py-5 text-sm font-bold transition-all ${activeTab === 'shipping' ? 'text-gray-900 bg-white border-b-2 border-yellow-500' : 'text-gray-400 hover:text-gray-600'}`}
                         >
                             SHIPPING
                         </button>
@@ -318,7 +308,8 @@ const Admin_dashboard = () => {
                                                                 </div>
                                                             ))}
                                                         </div>
-                                                    <div>
+                                                    </div>
+                                                    <div className="md:col-span-2">
                                                         <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">Order Summary</p>
                                                         <div className="space-y-2 bg-white p-4 rounded-xl border border-gray-100">
                                                             <div className="flex justify-between text-xs">
@@ -346,51 +337,73 @@ const Admin_dashboard = () => {
                                     </div>
                                 )}
 
-                                {(activeTab === 'products' || activeTab === 'stories') && (activeTab === 'products' ? products : stories).map((item) => (
+                                {activeTab === 'products' && products.map((product) => (
                                     <div
-                                        key={item.id}
+                                        key={product.id}
                                         className="p-4 rounded-2xl bg-gray-50 hover:bg-white border border-transparent hover:border-gray-100 hover:shadow-lg transition-all flex flex-col sm:flex-row items-center gap-6"
                                     >
                                         <img
-                                            src={activeTab === 'products'
-                                                ? (Array.isArray(item.image) ? item.image[0] : item.image || '/placeholder.jpg')
-                                                : (item.image || '/placeholder.jpg')
-                                            }
+                                            src={Array.isArray(product.image) ? product.image[0] : product.image || '/placeholder.jpg'}
                                             alt=""
                                             className="w-20 h-20 rounded-xl object-cover shadow-sm bg-white"
                                         />
-
                                         <div className="flex-1 text-center sm:text-left min-w-0">
-                                            <h3 className="text-lg font-bold text-gray-900 truncate">
-                                                {activeTab === 'products' ? item.name : item.title}
-                                            </h3>
+                                            <h3 className="text-lg font-bold text-gray-900 truncate">{product.name}</h3>
                                             <p className="text-sm text-gray-500 font-medium mt-1">
-                                                {activeTab === 'products'
-                                                    ? `₦${item.price?.toLocaleString()} • ${item.stock} left`
-                                                    : item.content?.substring(0, 120) + '...'
-                                                }
+                                                ₦{product.price?.toLocaleString()} • {product.stock} left
                                             </p>
                                         </div>
-
                                         <div className="flex items-center gap-2">
                                             <button
-                                                onClick={() => handleEdit(activeTab, item)}
+                                                onClick={() => handleEdit('products', product)}
                                                 className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-                                                title="Edit Item"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(activeTab, item.id)}
+                                                onClick={() => handleDelete('products', product.id)}
                                                 className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-100 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm"
-                                                title="Delete Item"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                             </button>
                                         </div>
                                     </div>
                                 ))}
-                                {(activeTab === 'products' ? products : stories).length === 0 && (
+
+                                {activeTab === 'stories' && stories.map((story) => (
+                                    <div
+                                        key={story.id}
+                                        className="p-4 rounded-2xl bg-gray-50 hover:bg-white border border-transparent hover:border-gray-100 hover:shadow-lg transition-all flex flex-col sm:flex-row items-center gap-6"
+                                    >
+                                        <img
+                                            src={story.image || '/placeholder.jpg'}
+                                            alt=""
+                                            className="w-20 h-20 rounded-xl object-cover shadow-sm bg-white"
+                                        />
+                                        <div className="flex-1 text-center sm:text-left min-w-0">
+                                            <h3 className="text-lg font-bold text-gray-900 truncate">{story.title}</h3>
+                                            <p className="text-sm text-gray-500 font-medium mt-1 truncate max-w-md">
+                                                {story.content?.substring(0, 80)}...
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => handleEdit('stories', story)}
+                                                className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete('stories', story.id)}
+                                                className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-100 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {((activeTab === 'products' && products.length === 0) || (activeTab === 'stories' && stories.length === 0)) && (
                                     <div className="text-center py-20 opacity-50">
                                         <p className="text-xl font-medium">No {activeTab} yet.</p>
                                     </div>
@@ -473,9 +486,7 @@ const Admin_dashboard = () => {
                                         <div>
                                             <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4 block">Product Visuals (Max 4)</label>
                                             
-                                            {/* Preview Grid */}
                                             <div className="grid grid-cols-4 gap-4 mb-6">
-                                                {/* Existing/Selected Images */}
                                                 {[...productForm.image.filter(url => url && url.trim() !== ''), ...selectedFiles.map(f => URL.createObjectURL(f))].slice(0, 4).map((img, idx) => (
                                                     <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 group">
                                                         <img src={img} alt="" className="w-full h-full object-cover" />
@@ -483,11 +494,9 @@ const Admin_dashboard = () => {
                                                             type="button"
                                                             onClick={() => {
                                                                 if (idx < productForm.image.filter(url => url && url.trim() !== '').length) {
-                                                                    // Remove existing URL
                                                                     const newImages = productForm.image.filter((_, i) => i !== idx);
                                                                     setProductForm({ ...productForm, image: newImages });
                                                                 } else {
-                                                                    // Remove selected file
                                                                     const fileIdx = idx - productForm.image.filter(url => url && url.trim() !== '').length;
                                                                     const newFiles = [...selectedFiles];
                                                                     newFiles.splice(fileIdx, 1);
@@ -501,7 +510,6 @@ const Admin_dashboard = () => {
                                                     </div>
                                                 ))}
                                                 
-                                                {/* Add Button Placeholder if < 4 */}
                                                 {(productForm.image.filter(url => url && url.trim() !== '').length + selectedFiles.length) < 4 && (
                                                     <label className="aspect-square rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:border-yellow-500 hover:bg-yellow-50/30 transition-all group">
                                                         <input
