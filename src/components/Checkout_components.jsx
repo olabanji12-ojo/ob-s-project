@@ -448,8 +448,8 @@ const Checkout_components = () => {
             <button
               type="submit"
               id="place-order-btn"
-              disabled={loading || shippingFee === 0}
-              className={`w-full bg-gray-900 text-white py-5 px-4 rounded-2xl font-black uppercase tracking-widest hover:bg-[#8B5E3C] transition duration-300 shadow-xl ${loading || shippingFee === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={loading || (!formData.city)}
+              className={`w-full bg-gray-900 text-white py-5 px-4 rounded-2xl font-black uppercase tracking-widest hover:bg-[#8B5E3C] transition duration-300 shadow-xl ${loading || (!formData.city) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? 'Processing...' : 'Proceed to Payment'}
             </button>
