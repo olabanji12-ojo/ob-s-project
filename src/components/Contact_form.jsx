@@ -71,7 +71,7 @@ const Contact_form = () => {
                     {/* Contact Form */}
                     <div className="bg-white p-8 sm:p-12 rounded-[3rem] shadow-2xl shadow-gray-200/50 border border-gray-50" data-aos="fade-left">
                         <form 
-                            action="https://formspree.io/f/emmanuelojo291@gmail.com" 
+                            action="https://formspree.io/f/xeevneyb" 
                             method="POST" 
                             className="space-y-6"
                         >
