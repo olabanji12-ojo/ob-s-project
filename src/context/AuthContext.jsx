@@ -8,9 +8,9 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
-
 } from 'firebase/auth';
-import { auth } from '../firebase/firebase';
+import { auth, db } from '../firebase/firebase';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 const AuthContext = createContext();
 
@@ -28,14 +28,23 @@ export function AuthProvider({ children }) {
   function signup(email, password, displayName) {
     return createUserWithEmailAndPassword(auth, email, password)
       .then(async (userCredential) => {
+        const user = userCredential.user;
+        
         // Update display name
-        await updateProfile(userCredential.user, {
+        await updateProfile(user, {
           displayName: displayName
         });
 
-        // Initial user document creation is optional here, 
-        // but we assume admins are set manually in Firestore for now.
-        return userCredential.user;
+        // Initialize user document in Firestore
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          email: user.email,
+          fullName: displayName,
+          createdAt: serverTimestamp(),
+          role: 'user' // Default role
+        }, { merge: true });
+
+        return user;
       });
   }
 
@@ -49,7 +58,18 @@ export function AuthProvider({ children }) {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      return result.user; // you can access name, email, photoURL here
+      const user = result.user;
+
+      // Ensure user document exists in Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        email: user.email,
+        fullName: user.displayName,
+        createdAt: serverTimestamp(),
+        // Note: We don't overwrite role if it already exists
+      }, { merge: true });
+
+      return user;
     } catch (error) {
       console.error("Google Sign-In Error:", error);
       throw error;
@@ -68,8 +88,6 @@ export function AuthProvider({ children }) {
       if (user) {
         try {
           // Fetch user role from Firestore
-          const { doc, getDoc } = await import('firebase/firestore');
-          const { db } = await import('../firebase/firebase');
           const userDoc = await getDoc(doc(db, 'users', user.uid));
 
           if (userDoc.exists()) {
