@@ -7,7 +7,8 @@ import {
   onAuthStateChanged,
   updateProfile,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from 'firebase/auth';
 import { auth, db } from '../firebase/firebase';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -63,21 +64,10 @@ export function AuthProvider({ children }) {
   const googleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      // Ensure user document exists in Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        email: user.email,
-        fullName: user.displayName,
-        createdAt: serverTimestamp(),
-        // Note: We don't overwrite role if it already exists
-      }, { merge: true });
-
-      return user;
+      console.log("🚀 AuthContext: Starting Google Redirect Login...");
+      await signInWithRedirect(auth, provider);
     } catch (error) {
-      console.error("Google Sign-In Error:", error);
+      console.error("Google Redirect Error:", error);
       throw error;
     }
   };
@@ -89,6 +79,28 @@ export function AuthProvider({ children }) {
 
   // Listen for auth state changes
   useEffect(() => {
+    // 1. Handle Redirect Result if coming back from Google
+    const handleRedirect = async () => {
+        try {
+            const result = await getRedirectResult(auth);
+            if (result) {
+                const user = result.user;
+                console.log("🏗️ AuthContext: Google Login detected, creating profile...", user.uid);
+                await setDoc(doc(db, 'users', user.uid), {
+                    uid: user.uid,
+                    email: user.email,
+                    fullName: user.displayName,
+                    createdAt: serverTimestamp(),
+                }, { merge: true });
+                console.log("✅ AuthContext: Google profile synced");
+            }
+        } catch (error) {
+            console.error("Redirect Result Error:", error);
+        }
+    };
+    handleRedirect();
+
+    // 2. Auth State Listener
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
