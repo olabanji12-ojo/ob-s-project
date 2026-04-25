@@ -52,21 +52,46 @@ const Admin_dashboard = () => {
 
     const fetchData = async () => {
         setLoading(true);
+        console.log("🕵️ Admin Debug: Current User Info:", {
+            uid: currentUser?.uid,
+            email: currentUser?.email,
+            emailVerified: currentUser?.emailVerified
+        });
+
         try {
-            const productsSnapshot = await getDocs(collection(db, 'products'));
-            const productsList = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setProducts(productsList);
+            // Fetch Products
+            try {
+                const productsSnapshot = await getDocs(collection(db, 'products'));
+                const productsList = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setProducts(productsList);
+                console.log("✅ Products Fetched");
+            } catch (err) {
+                console.error("❌ Permission Error: Products", err);
+            }
 
-            const storiesSnapshot = await getDocs(collection(db, 'stories'));
-            const storiesList = storiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setStories(storiesList);
+            // Fetch Stories
+            try {
+                const storiesSnapshot = await getDocs(collection(db, 'stories'));
+                const storiesList = storiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setStories(storiesList);
+                console.log("✅ Stories Fetched");
+            } catch (err) {
+                console.error("❌ Permission Error: Stories", err);
+            }
 
-            const ordersSnapshot = await getDocs(collection(db, 'orders'));
-            const ordersList = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            console.log("📍 ADMIN DEBUG: Fetched Orders & Shipping Details:", ordersList);
-            setOrders(ordersList);
+            // Fetch Orders
+            try {
+                const ordersSnapshot = await getDocs(collection(db, 'orders'));
+                const ordersList = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                console.log("📍 ADMIN DEBUG: Fetched Orders & Shipping Details:", ordersList);
+                setOrders(ordersList);
+                console.log("✅ Orders Fetched");
+            } catch (err) {
+                console.error("❌ Permission Error: Orders", err);
+            }
+
         } catch (error) {
-            console.error("Error fetching data:", error);
+            console.error("General Error fetching data:", error);
         } finally {
             setLoading(false);
         }
