@@ -63,6 +63,7 @@ const Admin_dashboard = () => {
 
             const ordersSnapshot = await getDocs(collection(db, 'orders'));
             const ordersList = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            console.log("📍 ADMIN DEBUG: Fetched Orders & Shipping Details:", ordersList);
             setOrders(ordersList);
         } catch (error) {
             console.error("Error fetching data:", error);
