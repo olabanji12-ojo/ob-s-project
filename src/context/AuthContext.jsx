@@ -36,13 +36,19 @@ export function AuthProvider({ children }) {
         });
 
         // Initialize user document in Firestore
-        await setDoc(doc(db, 'users', user.uid), {
-          uid: user.uid,
-          email: user.email,
-          fullName: displayName,
-          createdAt: serverTimestamp(),
-          role: 'user' // Default role
-        }, { merge: true });
+        console.log("🏗️ AuthContext: Initializing profile in Firestore for", user.uid);
+        try {
+          await setDoc(doc(db, 'users', user.uid), {
+            uid: user.uid,
+            email: user.email,
+            fullName: displayName,
+            createdAt: serverTimestamp(),
+            role: 'user' // Default role
+          }, { merge: true });
+          console.log("✅ AuthContext: Profile created successfully");
+        } catch (dbErr) {
+          console.error("❌ AuthContext: Failed to create profile in DB:", dbErr);
+        }
 
         return user;
       });
