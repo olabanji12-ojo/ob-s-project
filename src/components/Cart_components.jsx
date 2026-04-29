@@ -1,12 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { db } from '../firebase/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 const Cart_components = () => {
   const { items, totalCount, totalPrice, updateQuantity, removeFromCart } = useCart();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+
+  const [stocks, setStocks] = useState({});
+  const [checkingStock, setCheckingStock] = useState(false);
+
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    const fetchStocks = async () => {
+      setCheckingStock(true);
+      const newStocks = {};
+      try {
+        for (const item of items) {
+          const pId = item.productId || item.id;
+          if (!pId) continue;
+          const snap = await getDoc(doc(db, 'products', pId));
+          if (snap.exists()) {
+            newStocks[pId] = snap.data().stock ?? 0;
+          } else {
+            newStocks[pId] = -1; // Not found
+          }
+        }
+        setStocks(newStocks);
+      } catch (err) {
+        console.error("Error checking cart stock:", err);
+      } finally {
+        setCheckingStock(false);
+      }
+    };
+
+    fetchStocks();
+  }, [items]);
+
+  const hasInvalidItems = items.some(item => {
+    const pId = item.productId || item.id;
+    const stock = stocks[pId];
+    return stock !== undefined && (stock === -1 || item.quantity > stock);
+  });
 
   return (
     <section
@@ -104,8 +143,17 @@ const Cart_components = () => {
                         </div>
 
                         {/* Item Total */}
-                        <div className="text-base sm:text-lg font-bold text-[#3E3E3E]">
-                          ₦{(item.price * item.quantity).toLocaleString()}
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="text-base sm:text-lg font-bold text-[#3E3E3E]">
+                            ₦{(item.price * item.quantity).toLocaleString()}
+                          </div>
+                          {stocks[item.productId || item.id] !== undefined && (
+                            stocks[item.productId || item.id] === -1 ? (
+                              <span className="text-[10px] text-red-500 font-bold uppercase tracking-tight">Unavailable</span>
+                            ) : item.quantity > stocks[item.productId || item.id] ? (
+                              <span className="text-[10px] text-red-500 font-bold uppercase tracking-tight">Only {stocks[item.productId || item.id]} left</span>
+                            ) : null
+                          )}
                         </div>
                       </div>
                     </div>
@@ -212,12 +260,13 @@ const Cart_components = () => {
                 onClick={async () => {
                   navigate('/checkout_page')
                 }}
-                className="w-full text-center bg-[#F4C430] hover:bg-[#E5B520] text-[#3E3E3E] font-semibold py-3 sm:py-3.5 rounded-lg mb-3 transition duration-300 shadow-sm hover:shadow-md"
+                disabled={items.length === 0 || hasInvalidItems || checkingStock}
+                className={`w-full text-center bg-[#F4C430] hover:bg-[#E5B520] text-[#3E3E3E] font-semibold py-3 sm:py-3.5 rounded-lg mb-3 transition duration-300 shadow-sm hover:shadow-md ${ (items.length === 0 || hasInvalidItems || checkingStock) ? 'opacity-50 cursor-not-allowed' : '' }`}
                 data-aos="zoom-in"
                 data-aos-delay="600"
                 data-aos-duration="800"
               >
-                Proceed to Checkout
+                {checkingStock ? 'Verifying Stock...' : 'Proceed to Checkout'}
               </button>
 
               {/* Continue Shopping */}

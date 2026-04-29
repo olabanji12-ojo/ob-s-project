@@ -29,7 +29,7 @@ const Checkout_components = () => {
     const outOfStockItems = [];
 
     for (const item of cartItems) {
-      const pId = item.id || item.productId;
+      const pId = item.productId || item.id;
       if (!pId) continue;
       const productRef = doc(db, "products", pId);
       const productSnap = await getDoc(productRef);
@@ -57,7 +57,7 @@ const Checkout_components = () => {
 
   const updateProductStock = async (cartItems) => {
     for (const item of cartItems) {
-      const pId = item.id || item.productId;
+      const pId = item.productId || item.id;
       if (!pId) continue;
       
       const productRef = doc(db, "products", pId);

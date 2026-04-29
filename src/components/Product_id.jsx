@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { QRCodeSVG } from 'qrcode.react';
 import { motion } from 'framer-motion';
@@ -19,32 +19,29 @@ const Product_id = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      if (!id) {
-        setError("No product ID found.");
-        setLoading(false);
-        return;
+    if (!id) {
+      setError("No product ID found.");
+      setLoading(false);
+      return;
+    }
+
+    const docRef = doc(db, "products", id);
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setProduct({ id: docSnap.id, ...docSnap.data() });
+        setError("");
+      } else {
+        setError("Product not found.");
+        setTimeout(() => navigate("/products"), 2000);
       }
+      setLoading(false);
+    }, (err) => {
+      console.error("Error listening to product:", err);
+      setError("Failed to load product details.");
+      setLoading(false);
+    });
 
-      try {
-        const docRef = doc(db, "products", id);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          setProduct({ id: docSnap.id, ...docSnap.data() });
-        } else {
-          setError("Product not found.");
-          setTimeout(() => navigate("/products"), 2000);
-        }
-      } catch (err) {
-        console.error("Error fetching product:", err);
-        setError("Failed to load product details.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProduct();
+    return () => unsubscribe();
   }, [id, navigate]);
 
   const handlePrevImage = () => {
