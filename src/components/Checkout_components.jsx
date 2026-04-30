@@ -56,16 +56,35 @@ const Checkout_components = () => {
 
 
   const updateProductStock = async (cartItems) => {
+    console.log("Starting stock update for items:", cartItems);
     for (const item of cartItems) {
       const pId = item.productId || item.id;
-      if (!pId) continue;
+      if (!pId) {
+        console.error("No product ID found for item:", item);
+        continue;
+      }
       
-      const productRef = doc(db, "products", pId);
+      // If it's a composite ID (from Firestore cart), extract the product part
+      const cleanId = pId.includes('_') ? pId.split('_').pop() : pId;
+      
+      const productRef = doc(db, "products", cleanId);
       const productSnap = await getDoc(productRef);
+      
       if (productSnap.exists()) {
         const productData = productSnap.data();
-        const newStock = (productData.stock || 0) - (item.quantity || 0);
-        await updateDoc(productRef, { stock: Math.max(newStock, 0) });
+        const currentStock = Number(productData.stock) || 0;
+        const decrementAmount = Number(item.quantity) || 1;
+        const newStock = Math.max(currentStock - decrementAmount, 0);
+        
+        console.log(`Updating stock for ${cleanId}: ${currentStock} -> ${newStock}`);
+        
+        await updateDoc(productRef, { 
+          stock: newStock,
+          // We can also add a 'isSold' flag if we want, but stock: 0 is already handled by UI
+          updatedAt: serverTimestamp()
+        });
+      } else {
+        console.error(`Product ${cleanId} not found in database during stock update.`);
       }
     }
   };
@@ -199,7 +218,7 @@ const Checkout_components = () => {
               const orderData = {
                 userId: currentUser.uid || "Guest",
                 items: items.map(it => ({
-                  id: it.id || it.productId || "unknown",
+                  productId: it.productId || (it.id?.includes('_') ? it.id.split('_').pop() : it.id) || "unknown",
                   name: it.name || "Unknown Product",
                   price: it.price || 0,
                   quantity: it.quantity || 1
