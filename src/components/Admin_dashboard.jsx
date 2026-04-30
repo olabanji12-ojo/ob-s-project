@@ -123,7 +123,7 @@ const Admin_dashboard = () => {
             setStoryForm({
                 title: item.title || '',
                 content: item.content || '',
-                image: item.image || '',
+                image: Array.isArray(item.image) ? item.image[0] : (item.image || ''),
                 productId: item.id || ''
             });
             setActiveTab('stories');
@@ -160,7 +160,7 @@ const Admin_dashboard = () => {
 
         try {
             let finalImageUrls = activeTab === 'products' ? [...productForm.image] : [storyForm.image];
-            finalImageUrls = finalImageUrls.filter(url => url && url.trim() !== '');
+            finalImageUrls = finalImageUrls.filter(url => url && typeof url === 'string' && url.trim() !== '');
 
             if (selectedFiles.length > 0) {
                 try {
