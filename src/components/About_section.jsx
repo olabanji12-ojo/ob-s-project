@@ -17,7 +17,7 @@ const About_section = () => {
           <h2 
             className="text-3xl sm:text-4xl font-serif text-center font-bold text-gray-800 mb-6"
           >
-            About Our Collection
+            About The Collection
           </h2>
           <div className="space-y-4 text-base sm:text-lg text-gray-600 leading-relaxed">
             <p>Knots’ Stories is a community of storytellers, proudly and creatively sharing African stories, art and fashion.</p>
