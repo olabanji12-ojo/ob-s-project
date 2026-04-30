@@ -107,12 +107,12 @@ const Checkout_components = () => {
   }, [currentUser]);
 
   useEffect(() => {
-    if (formData.city === 'Lagos') {
-      setShippingFee(2500);
-    } else if (formData.city === 'Ibadan') {
-      setShippingFee(3500);
-    } else if (formData.city === 'Outside') {
-      setShippingFee(0); // Pay on Delivery
+    if (formData.city === 'Lagos Mainland') {
+      setShippingFee(5500);
+    } else if (formData.city === 'Lagos Island') {
+      setShippingFee(7500);
+    } else if (formData.city === 'Interstate') {
+      setShippingFee(8500);
     } else {
       setShippingFee(0);
     }
@@ -122,9 +122,10 @@ const Checkout_components = () => {
     const { name, value } = e.target;
     
     if (name === 'city') {
-      let state = 'Oyo'; 
-      if (value === 'Lagos') state = 'Lagos';
-      if (value === 'Outside') state = 'Other State';
+      let state = 'Lagos'; 
+      if (value === 'Interstate') state = 'Outside Lagos';
+      if (value === 'International') state = 'International';
+      if (value === 'Pickup') state = 'Pickup';
       setFormData(prev => ({ ...prev, city: value, state: state }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -307,12 +308,12 @@ const Checkout_components = () => {
             <div className="flex gap-3">
               <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider mb-1">Shipping Disclaimer</p>
+                <p className="text-xs font-bold uppercase tracking-wider mb-1">Shipping Categories</p>
                 <p className="text-sm font-medium leading-relaxed">
-                  We currently offer direct shipping selection for <span className="font-bold">Lagos</span> and <span className="font-bold">Ibadan</span> only. 
+                  Select your location to see the flat-rate shipping fee. 
                 </p>
-                <p className="text-xs mt-2 opacity-80">
-                  Staying elsewhere? <Link to="/contact" className="underline font-bold hover:text-yellow-900">Contact us for a special delivery quote</Link>.
+                <p className="text-xs mt-2 opacity-80 italic">
+                  International? We will contact you for custom shipping details after you pay for your products.
                 </p>
               </div>
             </div>
@@ -333,10 +334,12 @@ const Checkout_components = () => {
                   className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium appearance-none"
                   required
                 >
-                  <option value="">Select your city...</option>
-                  <option value="Lagos">Lagos (₦2,500)</option>
-                  <option value="Ibadan">Ibadan (₦3,500)</option>
-                  <option value="Outside">Outside Lagos/Ibadan (Pay on Delivery)</option>
+                  <option value="">Select shipping category...</option>
+                  <option value="Lagos Mainland">Lagos Mainland (₦5,500)</option>
+                  <option value="Lagos Island">Lagos Island (₦7,500)</option>
+                  <option value="Interstate">Interstate - Outside Lagos (₦8,500)</option>
+                  <option value="International">International Shipping (Contact for Details)</option>
+                  <option value="Pickup">Self-Pickup (Free)</option>
                 </select>
               </div>
               <div>
@@ -468,15 +471,17 @@ const Checkout_components = () => {
               <div className="flex justify-between text-gray-600">
                 <span>Shipping</span>
                 <span>
-                  {formData.city === 'Outside' 
-                    ? "Pay on Delivery" 
-                    : (shippingFee > 0 ? `₦${shippingFee.toLocaleString()}` : "Select city")
+                  {formData.city === 'International' 
+                    ? "Contact for Details" 
+                    : formData.city === 'Pickup'
+                      ? "Free"
+                      : (shippingFee > 0 ? `₦${shippingFee.toLocaleString()}` : "Select category")
                   }
                 </span>
               </div>
-              {formData.city === 'Outside' && (
+              {formData.city === 'International' && (
                 <p className="text-[10px] text-right text-gray-400 italic">
-                  Note: You only pay for products now. Shipping fee is paid to the courier at delivery.
+                  Note: You are paying for products now. We will contact you with a separate shipping quote.
                 </p>
               )}
               <div className="h-px bg-gray-100 my-4"></div>

@@ -352,7 +352,7 @@ const Admin_dashboard = () => {
                                                             <div className="flex justify-between text-xs">
                                                                 <span className="text-gray-400">Shipping:</span>
                                                                 <span className="font-bold">
-                                                                    {order.formData?.city === 'Outside' ? "Pay on Delivery" : `₦${order.shippingFee?.toLocaleString() || 0}`}
+                                                                    {order.formData?.city === 'International' ? "Contact for Quote" : order.formData?.city === 'Pickup' ? "Self-Pickup" : `₦${order.shippingFee?.toLocaleString() || 0}`}
                                                                 </span>
                                                             </div>
                                                             <div className="pt-2 border-t flex justify-between text-sm">
