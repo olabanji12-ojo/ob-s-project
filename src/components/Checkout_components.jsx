@@ -339,7 +339,7 @@ const Checkout_components = () => {
                   <option value="Lagos Island">Lagos Island (₦7,500)</option>
                   <option value="Interstate">Interstate - Outside Lagos (₦8,500)</option>
                   <option value="International">International Shipping (Contact for Details)</option>
-                  <option value="Pickup">Self-Pickup (Free)</option>
+                  <option value="Pickup">Self-Pickup</option>
                 </select>
               </div>
               <div>

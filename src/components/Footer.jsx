@@ -10,8 +10,8 @@ const Footer = () => {
 
         {/* Brand Section */}
         <div className="md:col-span-1">
-          <h3 className="text-xl font-bold font-serif mb-4 text-white">Forty Faces of Knots</h3>
-          <p className="text-sm">The Forty faces of Knots tote bag Collection is an original concept and design by Knots’ stories. Each piece is thoughtfully constructed with every stitch, form, and variation representing a distinct expression within the collection’s narrative; a one of one character, story and tote bag collectible.</p>
+          <h3 className="text-xl font-bold font-serif mb-4 text-white">Bomffa</h3>
+          <p className="text-sm">Everyting Fashion by Knots Stories</p>
         </div>
 
         {/* Quick Links */}
@@ -57,7 +57,7 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="mt-8 pt-8 border-t border-gray-700 text-center text-sm">
-        <p>&copy; {new Date().getFullYear()} 2026 Bomffa All rights reserved. {isAdmin && (
+        <p>&copy; {new Date().getFullYear()} Bomffa All rights reserved. {isAdmin && (
           <> • <Link to="/admin" className="hover:text-white transition-colors">Admin Dashboard</Link></>
         )}</p>
         <div className="flex justify-center space-x-4 mt-4">
