@@ -59,7 +59,7 @@ const Product_component = () => {
             data-aos="fade-up"
             data-aos-delay="200"
           >
-            The Artisan <span className="italic text-[#8B5E3C]">Tote</span> Collection
+            Forty Faces of Knots <span className="italic text-[#8B5E3C]">Tote bag</span> Collection
           </h2>
           <p
             className="text-lg text-gray-500 max-w-2xl mx-auto font-light leading-relaxed"
