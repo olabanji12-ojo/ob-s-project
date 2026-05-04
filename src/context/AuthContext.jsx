@@ -7,6 +7,7 @@ import {
   onAuthStateChanged,
   updateProfile,
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
 } from 'firebase/auth';
@@ -60,14 +61,25 @@ export function AuthProvider({ children }) {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
-  // 🔹 Google Login
+  // 🔹 Google Login (Switched to Popup for better reliability)
   const googleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      console.log("🚀 AuthContext: Starting Google Redirect Login...");
-      await signInWithRedirect(auth, provider);
+      console.log("🚀 AuthContext: Starting Google Popup Login...");
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      // Sync profile immediately to ensure it's available after redirect
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        email: user.email,
+        fullName: user.displayName,
+        createdAt: serverTimestamp(),
+      }, { merge: true });
+      
+      return user;
     } catch (error) {
-      console.error("Google Redirect Error:", error);
+      console.error("Google Sign-In Error:", error);
       throw error;
     }
   };
