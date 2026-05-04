@@ -9,8 +9,14 @@ const Login_component = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, googleSignIn } = useAuth();
+  const { login, googleSignIn, currentUser } = useAuth();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (currentUser) {
+      navigate('/');
+    }
+  }, [currentUser, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

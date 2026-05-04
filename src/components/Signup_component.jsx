@@ -12,9 +12,14 @@ const Signup_component = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signup } = useAuth();
+  const { login, signup, googleSignIn, currentUser } = useAuth();
   const navigate = useNavigate();
-  const { login, googleSignIn } = useAuth();
+
+  React.useEffect(() => {
+    if (currentUser) {
+      navigate('/');
+    }
+  }, [currentUser, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
