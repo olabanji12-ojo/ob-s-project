@@ -64,6 +64,15 @@ const Navbar = () => {
               Shop
             </Link>
 
+            <Link
+              to="/contributors"
+              onClick={() => handleLinkClick('Contributors')}
+              className={`text-[#3E3E3E] font-medium hover:text-[#F4C430] transition-colors duration-200
+                ${activeLink === 'Contributors' ? 'text-[#F4C430]' : ''}`}
+            >
+              Contributors
+            </Link>
+
             {/* Conditional Auth Links */}
             {currentUser ? (
               <>
@@ -168,6 +177,14 @@ const Navbar = () => {
                 ${activeLink === 'Shop' ? 'bg-[#F4C430] text-[#3E3E3E]' : ''}`}
             >
               Shop
+            </Link>
+            <Link
+              to="/contributors"
+              onClick={() => handleLinkClick('Contributors')}
+              className={`px-4 py-3 text-[#3E3E3E] font-medium hover:bg-[#E8DCC4] hover:bg-opacity-30 rounded-lg transition-all duration-200
+                ${activeLink === 'Contributors' ? 'bg-[#F4C430] text-[#3E3E3E]' : ''}`}
+            >
+              Contributors
             </Link>
             {/* Conditional Auth Links for Mobile */}
             {currentUser ? (

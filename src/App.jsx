@@ -17,6 +17,7 @@ import Art_pages from './pages/Art_pages'
 import Admin_page from './pages/Admin_page'
 import AdminRoute from './components/utils/AdminRoute'
 import Contact_page from './pages/Contact_page'
+import Contributors_page from './pages/Contributors_page'
 
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -62,6 +63,7 @@ const App = () => {
           <Route path='art' element={<Art_pages />} ></Route>
           <Route path='/art/:artworkId' element={<Art_pages />} />
           <Route path='/contact' element={<Contact_page />} />
+          <Route path='/contributors' element={<Contributors_page />} />
           <Route path='/admin' element={<AdminRoute><Admin_page /></AdminRoute>} />
 
 
