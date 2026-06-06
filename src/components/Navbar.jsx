@@ -150,7 +150,7 @@ const Navbar = () => {
           {/* Mobile Menu Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <h2 className="text-xl font-serif text-[#3E3E3E] font-semibold">
-              Bonfer
+              Bomffa
             </h2>
             <button
               onClick={toggleMobileMenu}

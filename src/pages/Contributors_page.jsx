@@ -3,7 +3,7 @@ import { contributorsData } from '../utils/contributorsData';
 
 const Contributors_page = () => {
   return (
-    <div className="min-h-screen bg-[#FAF8F5] font-sans">
+    <div className="min-h-screen bg-[#FAF8F5] poppins-regular">
       {/* Hero Section */}
       <div className="relative pt-24 pb-20 px-4 text-center overflow-hidden bg-[#3E3E3E] text-white">
         {/* Golden Gradient Orbs */}
@@ -11,7 +11,7 @@ const Contributors_page = () => {
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-[#F4C430] rounded-full mix-blend-overlay filter blur-[120px] opacity-20 translate-x-1/4 translate-y-1/4 pointer-events-none"></div>
         
         <div className="relative z-10">
-          <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6 text-white">
+          <h1 className="text-4xl md:text-6xl poppins-bold mb-6 text-white">
             Our Amazing <span className="text-[#F4C430] inline-block relative">Contributors
               <svg className="absolute w-full h-3 -bottom-2 left-0 text-[#F4C430]/40" viewBox="0 0 100 10" preserveAspectRatio="none">
                 <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="4" fill="transparent"/>
@@ -48,8 +48,8 @@ const Contributors_page = () => {
                 <div className="absolute -top-6 right-6 bg-[#F4C430] text-[#3E3E3E] w-12 h-12 rounded-full flex items-center justify-center font-bold shadow-lg transform rotate-12 group-hover:rotate-0 transition-transform duration-300">
                   ★
                 </div>
-                <h3 className="text-xl font-bold text-[#3E3E3E] mb-1">{contributor.name}</h3>
-                <p className="text-sm font-semibold text-[#F4C430] mb-3">{contributor.role}</p>
+                <h3 className="text-xl poppins-bold text-[#3E3E3E] mb-1">{contributor.name}</h3>
+                <p className="text-sm poppins-semibold text-[#F4C430] mb-3">{contributor.role}</p>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   {contributor.description}
                 </p>
