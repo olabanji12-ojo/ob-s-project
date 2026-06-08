@@ -1,7 +1,27 @@
-import React from 'react';
-import { contributorsData } from '../utils/contributorsData';
+import React, { useState, useEffect } from 'react';
+import { db } from '../firebase/firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import { Quote, Feather } from 'lucide-react';
 
 const Contributors_page = () => {
+  const [contributors, setContributors] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContributors = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'contributors'));
+        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setContributors(data);
+      } catch (error) {
+        console.error("Error fetching contributors: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchContributors();
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#FAF8F5] poppins-regular">
       {/* Hero Section */}
@@ -27,36 +47,49 @@ const Contributors_page = () => {
 
       {/* Contributors Grid */}
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {contributorsData.map((contributor) => (
-            <div 
-              key={contributor.id} 
-              className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-gray-100 group"
-            >
-              {/* Image Container */}
-              <div className="w-full h-64 overflow-hidden relative">
-                <img 
-                  src={contributor.image} 
-                  alt={contributor.name} 
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-              
-              {/* Details */}
-              <div className="p-6 relative">
-                <div className="absolute -top-6 right-6 bg-[#F4C430] text-[#3E3E3E] w-12 h-12 rounded-full flex items-center justify-center font-bold shadow-lg transform rotate-12 group-hover:rotate-0 transition-transform duration-300">
-                  ★
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-12 h-12 border-4 border-[#F4C430] border-t-transparent rounded-full animate-spin"></div>
+            <p className="mt-4 text-gray-500 font-medium animate-pulse">Loading contributors...</p>
+          </div>
+        ) : contributors.length === 0 ? (
+          <div className="text-center py-20 opacity-50">
+            <p className="text-xl font-medium text-gray-500">No contributors found.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {contributors.map((contributor) => (
+              <div 
+                key={contributor.id} 
+                className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 relative overflow-hidden flex flex-col h-full"
+              >
+                <div className="flex-1 relative z-10">
+                  {/* Top Icon & Role */}
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="w-12 h-12 rounded-full bg-[#3E3E3E] text-[#F4C430] flex items-center justify-center shadow-lg shrink-0">
+                      <Feather size={20} />
+                    </div>
+                    <span className="bg-[#F4C430]/10 text-[#D4A017] px-4 py-1.5 rounded-full text-xs poppins-bold uppercase tracking-wider text-right ml-4">
+                      {contributor.role}
+                    </span>
+                  </div>
+
+                  {/* Name */}
+                  <h3 className="text-2xl poppins-bold text-[#3E3E3E] mb-4">
+                    {contributor.name}
+                  </h3>
+
+                  {/* Bio */}
+                  <div className="relative">
+                    <p className="text-gray-600 text-sm leading-relaxed poppins-regular relative z-10 pb-4">
+                      {contributor.description}
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-xl poppins-bold text-[#3E3E3E] mb-1">{contributor.name}</h3>
-                <p className="text-sm poppins-semibold text-[#F4C430] mb-3">{contributor.role}</p>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {contributor.description}
-                </p>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

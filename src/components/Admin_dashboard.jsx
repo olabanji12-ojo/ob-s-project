@@ -20,6 +20,7 @@ const Admin_dashboard = () => {
     const [products, setProducts] = useState([]);
     const [stories, setStories] = useState([]);
     const [orders, setOrders] = useState([]);
+    const [contributors, setContributors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
@@ -40,6 +41,12 @@ const Admin_dashboard = () => {
         content: '',
         image: '',
         productId: ''
+    });
+
+    const [contributorForm, setContributorForm] = useState({
+        name: '',
+        role: '',
+        description: ''
     });
 
     useEffect(() => {
@@ -90,6 +97,16 @@ const Admin_dashboard = () => {
                 console.error("❌ Permission Error: Orders", err);
             }
 
+            // Fetch Contributors
+            try {
+                const contributorsSnapshot = await getDocs(collection(db, 'contributors'));
+                const contributorsList = contributorsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setContributors(contributorsList);
+                console.log("✅ Contributors Fetched");
+            } catch (err) {
+                console.error("❌ Permission Error: Contributors", err);
+            }
+
         } catch (error) {
             console.error("General Error fetching data:", error);
         } finally {
@@ -119,7 +136,7 @@ const Admin_dashboard = () => {
                 image: Array.isArray(item.image) ? item.image : [item.image || '']
             });
             setActiveTab('products');
-        } else {
+        } else if (type === 'stories') {
             setStoryForm({
                 title: item.title || '',
                 content: item.content || '',
@@ -127,6 +144,13 @@ const Admin_dashboard = () => {
                 productId: item.id || ''
             });
             setActiveTab('stories');
+        } else if (type === 'contributors') {
+            setContributorForm({
+                name: item.name || '',
+                role: item.role || '',
+                description: item.description || ''
+            });
+            setActiveTab('contributors');
         }
         setSelectedFiles([]);
         setIsModalOpen(true);
@@ -142,12 +166,18 @@ const Admin_dashboard = () => {
                 description: '',
                 image: ['']
             });
-        } else {
+        } else if (type === 'stories') {
             setStoryForm({
                 title: '',
                 content: '',
                 image: '',
                 productId: ''
+            });
+        } else if (type === 'contributors') {
+            setContributorForm({
+                name: '',
+                role: '',
+                description: ''
             });
         }
         setSelectedFiles([]);
@@ -159,50 +189,59 @@ const Admin_dashboard = () => {
         setUploading(true);
 
         try {
-            let finalImageUrls = activeTab === 'products' ? [...productForm.image] : [storyForm.image];
-            finalImageUrls = finalImageUrls.filter(url => url && typeof url === 'string' && url.trim() !== '');
-
-            if (selectedFiles.length > 0) {
-                try {
-                    const uploadPromises = selectedFiles.map(file => uploadToCloudinary(file));
-                    const newUrls = await Promise.all(uploadPromises);
-                    
-                    if (activeTab === 'products') {
-                        finalImageUrls = [...finalImageUrls, ...newUrls].slice(0, 4);
-                    } else {
-                        finalImageUrls = [newUrls[0]];
-                    }
-                } catch (uploadError) {
-                    alert("Image upload failed: " + uploadError.message);
-                    setUploading(false);
-                    return;
-                }
-            }
-
-            if (activeTab === 'products') {
-                const formData = {
-                    ...productForm,
-                    price: Number(productForm.price),
-                    stock: Number(productForm.stock),
-                    image: finalImageUrls
-                };
+            if (activeTab === 'contributors') {
+                const formData = { ...contributorForm };
                 if (editingItem) {
-                    await updateDoc(doc(db, 'products', editingItem.id), formData);
+                    await updateDoc(doc(db, 'contributors', editingItem.id), formData);
                 } else {
-                    await addDoc(collection(db, 'products'), formData);
+                    await addDoc(collection(db, 'contributors'), formData);
                 }
             } else {
-                if (!storyForm.productId) {
-                    alert("Please select a product for this story.");
-                    setUploading(false);
-                    return;
+                let finalImageUrls = activeTab === 'products' ? [...productForm.image] : [storyForm.image];
+                finalImageUrls = finalImageUrls.filter(url => url && typeof url === 'string' && url.trim() !== '');
+
+                if (selectedFiles.length > 0) {
+                    try {
+                        const uploadPromises = selectedFiles.map(file => uploadToCloudinary(file));
+                        const newUrls = await Promise.all(uploadPromises);
+                        
+                        if (activeTab === 'products') {
+                            finalImageUrls = [...finalImageUrls, ...newUrls].slice(0, 4);
+                        } else {
+                            finalImageUrls = [newUrls[0]];
+                        }
+                    } catch (uploadError) {
+                        alert("Image upload failed: " + uploadError.message);
+                        setUploading(false);
+                        return;
+                    }
                 }
-                const storyData = {
-                    title: storyForm.title,
-                    content: storyForm.content,
-                    image: finalImageUrls[0] || ''
-                };
-                await setDoc(doc(db, 'stories', storyForm.productId), storyData);
+
+                if (activeTab === 'products') {
+                    const formData = {
+                        ...productForm,
+                        price: Number(productForm.price),
+                        stock: Number(productForm.stock),
+                        image: finalImageUrls
+                    };
+                    if (editingItem) {
+                        await updateDoc(doc(db, 'products', editingItem.id), formData);
+                    } else {
+                        await addDoc(collection(db, 'products'), formData);
+                    }
+                } else if (activeTab === 'stories') {
+                    if (!storyForm.productId) {
+                        alert("Please select a product for this story.");
+                        setUploading(false);
+                        return;
+                    }
+                    const storyData = {
+                        title: storyForm.title,
+                        content: storyForm.content,
+                        image: finalImageUrls[0] || ''
+                    };
+                    await setDoc(doc(db, 'stories', storyForm.productId), storyData);
+                }
             }
             setIsModalOpen(false);
             setSelectedFiles([]);
@@ -244,16 +283,17 @@ const Admin_dashboard = () => {
                             className="px-6 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-bold hover:bg-yellow-600 transition-all shadow-lg flex items-center"
                         >
                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                            Add {activeTab === 'products' ? 'Product' : 'Story'}
+                            Add {activeTab === 'products' ? 'Product' : activeTab === 'contributors' ? 'Contributor' : 'Story'}
                         </button>
                     </div>
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10" data-aos="fade-up">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10" data-aos="fade-up">
                     {[
                         { label: 'Total Products', value: products.length, icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z', color: 'blue' },
                         { label: 'Art Stories', value: stories.length, icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.168.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', color: 'bg-yellow-50 text-yellow-600' },
+                        { label: 'Contributors', value: contributors.length, icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z', color: 'bg-indigo-50 text-indigo-600' },
                         { label: 'Drafts', value: 0, icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z', color: 'bg-purple-50 text-purple-600' },
                         { label: 'Out of Stock', value: products.filter(p => !p.stock).length, icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4', color: 'bg-red-50 text-red-600' },
                     ].map((stat, i) => (
@@ -289,6 +329,12 @@ const Admin_dashboard = () => {
                             className={`flex-1 py-5 text-sm font-bold transition-all ${activeTab === 'shipping' ? 'text-gray-900 bg-white border-b-2 border-yellow-500' : 'text-gray-400 hover:text-gray-600'}`}
                         >
                             SHIPPING
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('contributors')}
+                            className={`flex-1 py-5 text-sm font-bold transition-all ${activeTab === 'contributors' ? 'text-gray-900 bg-white border-b-2 border-yellow-500' : 'text-gray-400 hover:text-gray-600'}`}
+                        >
+                            CONTRIBUTORS
                         </button>
                         <button className="flex-1 py-5 text-sm font-bold text-gray-300 cursor-not-allowed">
                             ANALYTICS <span className="text-[10px] ml-1 opacity-50">(SOON)</span>
@@ -438,7 +484,39 @@ const Admin_dashboard = () => {
                                     </div>
                                 ))}
 
-                                {((activeTab === 'products' && products.length === 0) || (activeTab === 'stories' && stories.length === 0)) && (
+                                {activeTab === 'contributors' && contributors.map((contributor) => (
+                                    <div
+                                        key={contributor.id}
+                                        className="p-4 rounded-2xl bg-gray-50 hover:bg-white border border-transparent hover:border-gray-100 hover:shadow-lg transition-all flex flex-col sm:flex-row items-center gap-6"
+                                    >
+                                        <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-2xl shadow-sm shrink-0">
+                                            {contributor.name?.charAt(0) || '?'}
+                                        </div>
+                                        <div className="flex-1 text-center sm:text-left min-w-0">
+                                            <h3 className="text-lg font-bold text-gray-900 truncate">{contributor.name}</h3>
+                                            <p className="text-sm text-indigo-600 font-bold mt-1">{contributor.role}</p>
+                                            <p className="text-sm text-gray-500 font-medium mt-1 truncate max-w-md">
+                                                {contributor.description?.substring(0, 80)}...
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => handleEdit('contributors', contributor)}
+                                                className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete('contributors', contributor.id)}
+                                                className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-100 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {((activeTab === 'products' && products.length === 0) || (activeTab === 'stories' && stories.length === 0) || (activeTab === 'contributors' && contributors.length === 0)) && (
                                     <div className="text-center py-20 opacity-50">
                                         <p className="text-xl font-medium">No {activeTab} yet.</p>
                                     </div>
@@ -583,6 +661,42 @@ const Admin_dashboard = () => {
                                                     className="flex-1 bg-gray-50 border-0 rounded-2xl px-5 py-3 text-sm text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium"
                                                 />
                                             </div>
+                                        </div>
+                                    </>
+                                ) : activeTab === 'contributors' ? (
+                                    <>
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2 block">Contributor Name</label>
+                                            <input
+                                                type="text"
+                                                placeholder="e.g. Aderibigbe Adetola Esther"
+                                                required
+                                                value={contributorForm.name}
+                                                onChange={(e) => setContributorForm({ ...contributorForm, name: e.target.value })}
+                                                className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2 block">Role</label>
+                                            <input
+                                                type="text"
+                                                placeholder="e.g. Frontend Engineer & Writer"
+                                                required
+                                                value={contributorForm.role}
+                                                onChange={(e) => setContributorForm({ ...contributorForm, role: e.target.value })}
+                                                className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2 block">Biography</label>
+                                            <textarea
+                                                rows="5"
+                                                placeholder="Their background, passion, and experience..."
+                                                required
+                                                value={contributorForm.description}
+                                                onChange={(e) => setContributorForm({ ...contributorForm, description: e.target.value })}
+                                                className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-gray-900 focus:ring-4 focus:ring-yellow-500/10 transition-all font-medium"
+                                            ></textarea>
                                         </div>
                                     </>
                                 ) : (
